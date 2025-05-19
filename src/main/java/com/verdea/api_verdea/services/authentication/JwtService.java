@@ -1,6 +1,7 @@
 package com.verdea.api_verdea.services.authentication;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -11,16 +12,15 @@ import java.time.Instant;
 
 @Service
 public class JwtService {
-    @Value("${jwt.issuer}")
-    private String issuer;
-
-    @Value("${jwt.ttl}")
-    private Duration ttl;
+    private final String issuer;
+    private final Duration ttl;
 
     private final JwtEncoder jwtEncoder;
 
-    public JwtService(JwtEncoder jwtEncoder) {
+    public JwtService(JwtEncoder jwtEncoder, @Value("${jwt.issuer}") String issuer, @Value("${jwt.ttl}") Duration ttl) {
         this.jwtEncoder = jwtEncoder;
+        this.issuer = issuer;
+        this.ttl = ttl;
     }
 
     public String generateToken(String email) {
@@ -30,6 +30,8 @@ public class JwtService {
                 .expiresAt(Instant.now().plus(ttl))
                 .build();
 
-        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+        Jwt jwt = jwtEncoder.encode(JwtEncoderParameters.from(claims));
+
+        return jwt.getTokenValue();
     }
 }

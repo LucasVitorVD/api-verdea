@@ -70,7 +70,7 @@ public class CookieService {
         ResponseCookie cookie = ResponseCookie.from(refreshTokenCookieName, "")
                 .httpOnly(true)
                 .secure(secureCookie)
-                .path("/api/auth/refresh")
+                .path("/api/auth/refresh-token")
                 .maxAge(0)
                 .sameSite("Strict")
                 .build();

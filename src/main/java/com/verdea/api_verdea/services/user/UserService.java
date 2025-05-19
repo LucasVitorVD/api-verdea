@@ -35,7 +35,8 @@ public class UserService {
     }
 
     public UserResponseDTO getUserByEmail(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("A conta do usuário foi apagada ou inativada"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("A conta do usuário foi apagada ou inativada"));
 
         return userMapper.entityToResponse(user);
     }
