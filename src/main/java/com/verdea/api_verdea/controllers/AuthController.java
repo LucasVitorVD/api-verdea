@@ -64,7 +64,6 @@ public class AuthController {
             authenticationService.revokeRefreshToken(refreshToken);
         }
 
-        // Remove os cookies
         cookieService.deleteAccessTokenCookie(response);
         cookieService.deleteRefreshTokenCookie(response);
 

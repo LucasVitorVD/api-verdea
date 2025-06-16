@@ -46,7 +46,7 @@ public class CookieService {
         ResponseCookie cookie = ResponseCookie.from(refreshTokenCookieName, refreshToken.toString())
                 .httpOnly(true)
                 .secure(secureCookie)
-                .path("/api/auth/refresh-token")
+                .path("/")
                 .maxAge(refreshTokenTtlSeconds)
                 .sameSite("Strict")
                 .build();
@@ -70,7 +70,7 @@ public class CookieService {
         ResponseCookie cookie = ResponseCookie.from(refreshTokenCookieName, "")
                 .httpOnly(true)
                 .secure(secureCookie)
-                .path("/api/auth/refresh-token")
+                .path("/")
                 .maxAge(0)
                 .sameSite("Strict")
                 .build();

@@ -39,7 +39,7 @@ class JwtServiceTest {
 
     @Test
     @DisplayName("Should generate a valid JWT token")
-    void shouldGenerateToken() {
+    void generateTokenCase1() {
         when(jwtEncoder.encode(any())).thenReturn(jwt);
         when(jwt.getTokenValue()).thenReturn("fake-jwt-token");
 

@@ -28,6 +28,14 @@ public class JwtCookieFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+
+        // Ignora rotas públicas
+        if (path.startsWith("/api/auth/") || path.equals("/api/csrf")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // Extrai o token do cookie
         String token = cookieService.extractAccessTokenFromCookies(request);
 
