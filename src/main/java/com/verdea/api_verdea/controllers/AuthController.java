@@ -1,9 +1,12 @@
 package com.verdea.api_verdea.controllers;
 
+import com.verdea.api_verdea.dtos.userDto.ForgotPasswordRequest;
 import com.verdea.api_verdea.dtos.userDto.LoginResponse;
+import com.verdea.api_verdea.dtos.userDto.ResetPasswordRequest;
 import com.verdea.api_verdea.dtos.userDto.UserRequestDTO;
 import com.verdea.api_verdea.services.authentication.AuthenticationService;
 import com.verdea.api_verdea.services.authentication.CookieService;
+import com.verdea.api_verdea.services.resetPassword.PasswordResetService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -22,6 +26,8 @@ import java.util.UUID;
 public class AuthController {
     private final AuthenticationService authenticationService;
     private final CookieService cookieService;
+    private final PasswordResetService service;
+
 
     @PostMapping("/login")
     public ResponseEntity<String> authenticate(@RequestBody UserRequestDTO request, HttpServletResponse response) {
@@ -68,5 +74,19 @@ public class AuthController {
         cookieService.deleteRefreshTokenCookie(response);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> sendLink(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+        service.sendResetPasswordEmail(forgotPasswordRequest.email());
+
+        return ResponseEntity.ok("E-mail enviado!");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> reset(@RequestBody ResetPasswordRequest request) {
+        service.resetPassword(request.token(), request.newPassword());
+
+        return ResponseEntity.ok("Senha redefinida com sucesso");
     }
 }
