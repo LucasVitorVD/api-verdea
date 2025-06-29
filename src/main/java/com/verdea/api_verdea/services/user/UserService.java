@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -39,5 +41,13 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("A conta do usuário foi apagada ou inativada"));
 
         return userMapper.entityToResponse(user);
+    }
+
+    @Transactional
+    public void deleteUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado."));
+
+        userRepository.delete(user);
     }
 }
