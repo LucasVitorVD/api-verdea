@@ -9,6 +9,7 @@ import com.verdea.api_verdea.repositories.RefreshTokenRepository;
 import com.verdea.api_verdea.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,24 +30,28 @@ public class AuthenticationService {
     private final Duration refreshTokenTtl = Duration.ofDays(7);
 
     public LoginResponse authenticate(UserRequestDTO requestDTO) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(requestDTO.email(), requestDTO.password())
-        );
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(requestDTO.email(), requestDTO.password())
+            );
 
-        String userEmail = authentication.getName();
+            String userEmail = authentication.getName();
 
-        var accessToken = jwtService.generateToken(userEmail);
+            User user = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new UsernameNotFoundException("Usuário com o email: " + userEmail + " não encontrado"));
 
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuário com o email: " + userEmail + " não encontrado"));
+            var accessToken = jwtService.generateToken(userEmail);
 
-        RefreshToken refreshToken = new RefreshToken();
-        refreshToken.setUser(user);
-        refreshToken.setExpiresAt(Instant.now().plus(refreshTokenTtl));
+            RefreshToken refreshToken = new RefreshToken();
+            refreshToken.setUser(user);
+            refreshToken.setExpiresAt(Instant.now().plus(refreshTokenTtl));
 
-        refreshTokenRepository.save(refreshToken);
+            refreshTokenRepository.save(refreshToken);
 
-        return new LoginResponse(accessToken, refreshToken.getId());
+            return new LoginResponse(accessToken, refreshToken.getId());
+        } catch (BadCredentialsException ex) {
+            throw new BadCredentialsException("E-mail ou senha inválidos.");
+        }
     }
 
     public LoginResponse refreshToken(UUID refreshToken) {
