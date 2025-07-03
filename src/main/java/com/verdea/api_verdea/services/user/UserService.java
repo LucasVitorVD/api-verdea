@@ -1,5 +1,6 @@
 package com.verdea.api_verdea.services.user;
 
+import com.verdea.api_verdea.dtos.userDto.UpdateUserRequestDTO;
 import com.verdea.api_verdea.dtos.userDto.UserRequestDTO;
 import com.verdea.api_verdea.dtos.userDto.UserResponseDTO;
 import com.verdea.api_verdea.entities.User;
@@ -49,5 +50,26 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado."));
 
         userRepository.delete(user);
+    }
+
+    @Transactional
+    public UserResponseDTO updateUserInfo(String currentEmail, UpdateUserRequestDTO dto) {
+        User user = userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado."));
+
+        if (user.getEmail().equals(dto.email())) {
+            throw new EmailAlreadyInUseException("Este e-mail já está em uso.");
+        }
+
+        if (dto.email() != null) {
+            user.setEmail(dto.email());
+        }
+
+        if (dto.password() != null && !dto.password().isBlank()) {
+            user.setPassword(passwordEncoder.encode(dto.password()));
+        }
+
+        User updatedUser = userRepository.save(user);
+        return userMapper.entityToResponse(updatedUser);
     }
 }
