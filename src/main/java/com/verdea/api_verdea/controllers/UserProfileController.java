@@ -3,6 +3,7 @@ package com.verdea.api_verdea.controllers;
 import com.verdea.api_verdea.config.SecurityConfig;
 import com.verdea.api_verdea.dtos.userDto.UpdateUserRequestDTO;
 import com.verdea.api_verdea.dtos.userDto.UserResponseDTO;
+import com.verdea.api_verdea.entities.ApiError;
 import com.verdea.api_verdea.services.authentication.AuthenticationService;
 import com.verdea.api_verdea.services.authentication.CookieService;
 import com.verdea.api_verdea.services.user.UserService;
@@ -40,8 +41,8 @@ public class UserProfileController {
             description = "method to get all authenticated user profile data",
             responses = {
                     @ApiResponse(responseCode = "200", description = "User profile retrieved", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
-                    @ApiResponse(responseCode = "404", description = "User not found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
+                    @ApiResponse(responseCode = "404", description = "User not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiError.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiError.class)))
             }
     )
     public ResponseEntity<UserResponseDTO> getUserProfile(@Parameter(hidden = true) Authentication authentication) {
@@ -65,9 +66,9 @@ public class UserProfileController {
             ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "User profile updated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
-                    @ApiResponse(responseCode = "404", description = "User not found"),
-                    @ApiResponse(responseCode = "422", description = "Unprocessable entity - email already in use"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
+                    @ApiResponse(responseCode = "404", description = "User not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiError.class))),
+                    @ApiResponse(responseCode = "422", description = "Unprocessable entity - email already in use", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiError.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiError.class)))
             }
     )
     public ResponseEntity<UserResponseDTO> updateCurrentUser(
@@ -87,8 +88,8 @@ public class UserProfileController {
             description = "Deletes the currently authenticated user and invalidates associated tokens",
             responses = {
                     @ApiResponse(responseCode = "204", description = "User deleted"),
-                    @ApiResponse(responseCode = "404", description = "User not found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
+                    @ApiResponse(responseCode = "404", description = "User not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiError.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiError.class)))
             }
     )
     public ResponseEntity<Void> deleteOwnUser(

@@ -3,9 +3,11 @@ package com.verdea.api_verdea.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.verdea.api_verdea.dtos.userDto.LoginResponse;
 import com.verdea.api_verdea.dtos.userDto.UserRequestDTO;
+import com.verdea.api_verdea.dtos.userDto.UserResponseDTO;
 import com.verdea.api_verdea.exceptions.InvalidRefreshTokenException;
 import com.verdea.api_verdea.services.authentication.AuthenticationService;
 import com.verdea.api_verdea.services.authentication.CookieService;
+import com.verdea.api_verdea.services.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -38,6 +40,32 @@ class AuthControllerTest {
 
     @MockitoBean
     private CookieService cookieService;
+
+    @MockitoBean
+    private UserService userService;
+
+    @Test
+    @WithMockUser
+    @DisplayName("Should register user successfully")
+    void registerUserCase1() throws Exception {
+        UserRequestDTO request = new UserRequestDTO("email@gmail.com", "12345");
+        UserResponseDTO response = new UserResponseDTO(1L, request.email(), null);
+        String reqBody = new ObjectMapper().writeValueAsString(request);
+
+        when(userService.registerUser(eq(request))).thenReturn(response);
+
+        mockMvc.perform(post("/api/auth/register")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reqBody))
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.id").value(1L),
+                        jsonPath("$.email").value(response.email())
+                );
+
+        verify(userService).registerUser(eq(request));
+    }
 
     @Test
     @WithMockUser
