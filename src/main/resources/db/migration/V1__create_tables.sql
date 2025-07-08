@@ -12,9 +12,9 @@ CREATE TABLE devices (
     status VARCHAR(50) NOT NULL,
     battery_level INT,
     last_connection TIMESTAMP,
-    water_level INT,
+    tank_level DOUBLE PRECISION,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    user_id BIGINT NOT NULL,
+    user_id BIGINT,
     CONSTRAINT fk_device_user FOREIGN KEY (user_id) REFERENCES users(id)
 );
 

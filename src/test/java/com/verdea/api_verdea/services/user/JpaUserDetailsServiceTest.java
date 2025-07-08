@@ -12,8 +12,6 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,7 +29,11 @@ class JpaUserDetailsServiceTest {
     @Test
     @DisplayName("Should load user by email successfully")
     void loadUserByUsernameCase1() {
-        User user = new User(1L, "test@gmail.com", "encodedPassword", LocalDateTime.now(), null);
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("test@gmail.com");
+        user.setPassword("encodedPassword");
+
         String email = user.getEmail();
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));

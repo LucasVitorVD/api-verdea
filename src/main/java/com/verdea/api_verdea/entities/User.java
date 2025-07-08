@@ -47,6 +47,9 @@ public class User {
     @JsonIgnore
     private List<RefreshToken> refreshTokens = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Device> devices = new ArrayList<>();
+
     public boolean isLoginCorrect(UserRequestDTO request, PasswordEncoder passwordEncoder) {
         return passwordEncoder.matches(request.password(), this.password);
     }
