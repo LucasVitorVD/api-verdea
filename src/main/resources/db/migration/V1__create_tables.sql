@@ -9,10 +9,6 @@ CREATE TABLE devices (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     mac_address VARCHAR(17) NOT NULL UNIQUE,
-    status VARCHAR(50) NOT NULL,
-    battery_level INT,
-    last_connection TIMESTAMP,
-    tank_level DOUBLE PRECISION,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id BIGINT,
     CONSTRAINT fk_device_user FOREIGN KEY (user_id) REFERENCES users(id)

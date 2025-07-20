@@ -1,6 +1,5 @@
 package com.verdea.api_verdea.entities;
 
-import com.verdea.api_verdea.enums.DeviceStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -29,21 +28,6 @@ public class Device {
     @NotBlank(message = "Endereço MAC obrigatório")
     @Column(name = "mac_address", nullable = false, unique = true)
     private String macAddress;
-
-    @Enumerated(EnumType.STRING)
-    @NotNull(message = "Status é obrigatório")
-    @Column(nullable = false)
-    private DeviceStatus status;
-
-    @Min(0)
-    @Max(100)
-    private Integer batteryLevel;
-
-    private LocalDateTime lastConnection;
-
-    @DecimalMin("0.0")
-    @Column(name = "tank_level")
-    private Double tankLevel;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

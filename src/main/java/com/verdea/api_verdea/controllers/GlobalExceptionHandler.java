@@ -1,9 +1,7 @@
 package com.verdea.api_verdea.controllers;
 
 import com.verdea.api_verdea.entities.ApiError;
-import com.verdea.api_verdea.exceptions.EmailAlreadyInUseException;
-import com.verdea.api_verdea.exceptions.InvalidRefreshTokenException;
-import com.verdea.api_verdea.exceptions.UserNotFoundException;
+import com.verdea.api_verdea.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -32,6 +30,42 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.UNPROCESSABLE_ENTITY.value(),
                 "Unauthorized Entity",
+                ex.getMessage()
+        );
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
+    }
+
+    @ExceptionHandler(DeviceAlreadyExistsException.class)
+    public ResponseEntity<ApiError> handleDeviceAlreadyExists(DeviceAlreadyExistsException ex) {
+        ApiError error = new ApiError(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "Device Already Exists",
+                ex.getMessage()
+        );
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
+    }
+
+    @ExceptionHandler(DeviceNotFoundException.class)
+    public ResponseEntity<ApiError> handleDeviceNotFound(DeviceNotFoundException ex) {
+        ApiError error = new ApiError(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                "Device not found",
+                ex.getMessage()
+        );
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
+    }
+
+    @ExceptionHandler(DeviceAlreadyAssignedException.class)
+    public ResponseEntity<ApiError> handleDeviceAlreadyAssigned(DeviceAlreadyAssignedException ex) {
+        ApiError error = new ApiError(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "Device already assigned",
                 ex.getMessage()
         );
 

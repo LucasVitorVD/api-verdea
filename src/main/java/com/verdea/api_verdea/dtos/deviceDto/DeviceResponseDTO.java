@@ -1,5 +1,5 @@
 package com.verdea.api_verdea.dtos.deviceDto;
 
-import com.verdea.api_verdea.enums.DeviceStatus;
+import java.time.LocalDateTime;
 
-public record DeviceResponseDTO(String name, String macAddress, DeviceStatus status) {}
+public record DeviceResponseDTO(String name, String macAddress, LocalDateTime createdAt) {}
