@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 @RestController
@@ -46,6 +47,15 @@ public class DeviceController {
         String email = auth.getName();
 
         DeviceAssignmentResponseDTO response = deviceService.assignDeviceToUser(macAddress, email);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/my-devices")
+    public ResponseEntity<List<DeviceResponseDTO>> getMyDevices(@Parameter(hidden = true) Authentication auth) {
+        String email = auth.getName();
+
+        List<DeviceResponseDTO> response = deviceService.getDevicesByUserEmail(email);
 
         return ResponseEntity.ok(response);
     }

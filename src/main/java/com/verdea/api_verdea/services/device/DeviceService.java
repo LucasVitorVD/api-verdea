@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +46,7 @@ public class DeviceService {
 
         Device savedDevice = deviceRepository.save(device);
 
-        return new DeviceResponseDTO(savedDevice.getName(), savedDevice.getMacAddress(), savedDevice.getCreatedAt());
+        return new DeviceResponseDTO(savedDevice.getId(), savedDevice.getName(), savedDevice.getMacAddress(), savedDevice.getCreatedAt());
     }
 
     @Transactional
@@ -62,5 +63,16 @@ public class DeviceService {
         deviceRepository.save(device);
 
         return new DeviceAssignmentResponseDTO(device.getName(), device.getMacAddress(), device.getUser().getEmail(), LocalDateTime.now());
+    }
+
+    public List<DeviceResponseDTO> getDevicesByUserEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
+
+        List<Device> devices = deviceRepository.findAllByUser(user);
+
+        return devices.stream()
+                .map(device -> new DeviceResponseDTO(device.getId(), device.getName(), device.getMacAddress(), device.getCreatedAt()))
+                .toList();
     }
 }
