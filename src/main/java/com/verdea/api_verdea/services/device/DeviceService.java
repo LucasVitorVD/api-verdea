@@ -75,4 +75,12 @@ public class DeviceService {
                 .map(device -> new DeviceResponseDTO(device.getId(), device.getName(), device.getMacAddress(), device.getCreatedAt()))
                 .toList();
     }
+
+    @Transactional
+    public void deleteDeviceById(Long id) {
+        Device device = deviceRepository.findById(id)
+                .orElseThrow(() -> new DeviceNotFoundException("Dispositivo não encontrado."));
+
+        deviceRepository.delete(device);
+    }
 }
