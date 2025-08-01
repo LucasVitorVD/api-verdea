@@ -2,6 +2,7 @@ package com.verdea.api_verdea.controllers;
 
 import com.verdea.api_verdea.config.SecurityConfig;
 import com.verdea.api_verdea.dtos.plantDto.PlantRequestDTO;
+import com.verdea.api_verdea.dtos.plantDto.PlantResponseDTO;
 import com.verdea.api_verdea.services.plant.PlantService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -10,10 +11,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/plant")
@@ -30,5 +30,12 @@ public class PlantController {
         plantService.addPlant(dto, userEmail);
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<PlantResponseDTO>> getPlants(@Parameter(hidden = true) Authentication auth) {
+        List<PlantResponseDTO> plants = plantService.getPlantsByUserEmail(auth.getName());
+
+        return ResponseEntity.ok(plants);
     }
 }

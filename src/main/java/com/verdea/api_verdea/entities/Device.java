@@ -1,5 +1,6 @@
 package com.verdea.api_verdea.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -34,8 +35,11 @@ public class Device {
     private LocalDateTime createdAt;
 
     @ManyToOne
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     @OneToOne(mappedBy = "device")
+    @JsonIgnore
     private Plant plant;
 }

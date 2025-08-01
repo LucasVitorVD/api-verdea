@@ -1,5 +1,7 @@
 package com.verdea.api_verdea.dtos.plantDto;
 
+import com.verdea.api_verdea.entities.Device;
+
 import java.time.LocalDateTime;
 
 public record PlantResponseDTO(
@@ -11,6 +13,6 @@ public record PlantResponseDTO(
         Integer wateringFrequency,
         Double idealSoilMoisture,
         String imageUrl,
-        String deviceMacAddress
+        Device device
 ) {
 }
