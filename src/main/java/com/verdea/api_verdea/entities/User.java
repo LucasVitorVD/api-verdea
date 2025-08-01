@@ -50,6 +50,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Device> devices = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Plant> plants = new ArrayList<>();
+
     public boolean isLoginCorrect(UserRequestDTO request, PasswordEncoder passwordEncoder) {
         return passwordEncoder.matches(request.password(), this.password);
     }

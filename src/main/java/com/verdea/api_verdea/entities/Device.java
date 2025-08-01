@@ -35,4 +35,7 @@ public class Device {
 
     @ManyToOne
     private User user;
+
+    @OneToOne(mappedBy = "device")
+    private Plant plant;
 }

@@ -2,6 +2,7 @@ package com.verdea.api_verdea.services.resetPassword;
 
 import com.verdea.api_verdea.entities.PasswordResetToken;
 import com.verdea.api_verdea.entities.User;
+import com.verdea.api_verdea.exceptions.UserNotFoundException;
 import com.verdea.api_verdea.repositories.PasswordResetTokenRepository;
 import com.verdea.api_verdea.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class PasswordResetService {
     @Async
     public void sendResetPasswordEmail(String email) {
         User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
 
         String token = UUID.randomUUID().toString();
         PasswordResetToken resetToken = new PasswordResetToken();
