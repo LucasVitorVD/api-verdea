@@ -38,4 +38,18 @@ public class PlantController {
 
         return ResponseEntity.ok(plants);
     }
+
+    @PatchMapping("/update/{id}")
+    public ResponseEntity<PlantResponseDTO> updatePlant(@PathVariable Long id, @RequestBody @Valid PlantRequestDTO plantRequestDTO) {
+        PlantResponseDTO response = plantService.updatePlantData(id, plantRequestDTO);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deletePlant(@PathVariable Long id) {
+        plantService.deletePlantById(id);
+
+        return ResponseEntity.ok().build();
+    }
 }

@@ -7,6 +7,7 @@ import com.verdea.api_verdea.entities.Plant;
 import com.verdea.api_verdea.entities.User;
 import com.verdea.api_verdea.exceptions.DeviceAlreadyAssignedException;
 import com.verdea.api_verdea.exceptions.DeviceNotFoundException;
+import com.verdea.api_verdea.exceptions.PlantNotFoundException;
 import com.verdea.api_verdea.exceptions.UserNotFoundException;
 import com.verdea.api_verdea.repositories.DeviceRepository;
 import com.verdea.api_verdea.repositories.PlantRepository;
@@ -73,5 +74,67 @@ public class PlantService {
                         plant.getDevice()
                 ))
                 .toList();
+    }
+
+    @Transactional
+    public PlantResponseDTO updatePlantData(Long plantId, PlantRequestDTO plantRequestDTO) {
+        Plant plant = plantRepository.findById(plantId)
+                .orElseThrow(() -> new PlantNotFoundException("Planta não encontrada."));
+
+        // Caso o dispositivo tenha mudado
+        if (plantRequestDTO.deviceMacAddress() != null &&
+                !plantRequestDTO.deviceMacAddress().equals(plant.getDevice().getMacAddress())) {
+
+            Device newDevice = deviceRepository.findByMacAddress(plantRequestDTO.deviceMacAddress())
+                    .orElseThrow(() -> new DeviceNotFoundException("Dispositivo não encontrado."));
+
+            if (newDevice.getPlant() != null) {
+                throw new DeviceAlreadyAssignedException("Este dispositivo já está vinculado a uma planta.");
+            }
+
+            // Liberar o dispositivo antigo
+            Device oldDevice = plant.getDevice();
+
+            if (oldDevice != null) {
+                oldDevice.setPlant(null);
+            }
+
+            // Vincular o novo
+            newDevice.setPlant(plant);
+            plant.setDevice(newDevice);
+        }
+
+        // Atualizar os outros campos
+        plant.setName(plantRequestDTO.name());
+        plant.setSpecies(plantRequestDTO.species());
+        plant.setLocation(plantRequestDTO.location());
+        plant.setNotes(plantRequestDTO.notes());
+        plant.setWateringTime(plantRequestDTO.wateringTime());
+        plant.setWateringFrequency(plantRequestDTO.wateringFrequency());
+        plant.setIdealSoilMoisture(plantRequestDTO.idealSoilMoisture());
+        plant.setImage_url(plantRequestDTO.imageUrl());
+
+        Plant updatedPlant = plantRepository.save(plant);
+
+        return new PlantResponseDTO(
+                updatedPlant.getId(),
+                updatedPlant.getName(),
+                updatedPlant.getSpecies(),
+                updatedPlant.getLocation(),
+                updatedPlant.getNotes(),
+                updatedPlant.getWateringTime(),
+                updatedPlant.getWateringFrequency(),
+                updatedPlant.getIdealSoilMoisture(),
+                updatedPlant.getImage_url(),
+                updatedPlant.getDevice()
+        );
+    }
+
+    @Transactional
+    public void deletePlantById(Long id) {
+        Plant plant = plantRepository.findById(id)
+                .orElseThrow(() -> new PlantNotFoundException("Planta não encontrada."));
+
+        plantRepository.delete(plant);
     }
 }
