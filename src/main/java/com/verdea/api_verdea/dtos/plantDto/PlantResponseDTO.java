@@ -5,6 +5,7 @@ import com.verdea.api_verdea.entities.Device;
 import java.time.LocalDateTime;
 
 public record PlantResponseDTO(
+        Long id,
         String name,
         String species,
         String location,

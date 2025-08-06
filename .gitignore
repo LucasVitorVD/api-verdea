@@ -4,7 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-src/main/resources/application.properties
+!**/src/main/resources/application.properties
+!**/src/main/resources/app.key
+!**/src/main/resources/app.pub
 
 ### STS ###
 .apt_generated

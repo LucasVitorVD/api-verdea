@@ -61,6 +61,7 @@ public class PlantService {
 
         return plants.stream()
                 .map(plant -> new PlantResponseDTO(
+                        plant.getId(),
                         plant.getName(),
                         plant.getSpecies(),
                         plant.getLocation(),
