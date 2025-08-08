@@ -81,7 +81,6 @@ public class PlantService {
         Plant plant = plantRepository.findById(plantId)
                 .orElseThrow(() -> new PlantNotFoundException("Planta não encontrada."));
 
-        // Caso o dispositivo tenha mudado
         if (plantRequestDTO.deviceMacAddress() != null &&
                 !plantRequestDTO.deviceMacAddress().equals(plant.getDevice().getMacAddress())) {
 
@@ -92,19 +91,18 @@ public class PlantService {
                 throw new DeviceAlreadyAssignedException("Este dispositivo já está vinculado a uma planta.");
             }
 
-            // Liberar o dispositivo antigo
             Device oldDevice = plant.getDevice();
 
             if (oldDevice != null) {
                 oldDevice.setPlant(null);
+                deviceRepository.save(oldDevice);
             }
 
-            // Vincular o novo
             newDevice.setPlant(plant);
             plant.setDevice(newDevice);
+            deviceRepository.save(newDevice);
         }
 
-        // Atualizar os outros campos
         plant.setName(plantRequestDTO.name());
         plant.setSpecies(plantRequestDTO.species());
         plant.setLocation(plantRequestDTO.location());
@@ -131,9 +129,16 @@ public class PlantService {
     }
 
     @Transactional
-    public void deletePlantById(Long id) {
-        Plant plant = plantRepository.findById(id)
+    public void deletePlant(Long plantId) {
+        Plant plant = plantRepository.findById(plantId)
                 .orElseThrow(() -> new PlantNotFoundException("Planta não encontrada."));
+
+        if (plant.getDevice() != null) {
+            Device device = plant.getDevice();
+            plant.setDevice(null);
+            device.setPlant(null);
+            deviceRepository.save(device);
+        }
 
         plantRepository.delete(plant);
     }
