@@ -1,8 +1,7 @@
 package com.verdea.api_verdea.dtos.plantDto;
 
 import com.verdea.api_verdea.entities.Device;
-
-import java.time.LocalDateTime;
+import com.verdea.api_verdea.enums.WateringFrequency;
 
 public record PlantResponseDTO(
         Long id,
@@ -10,8 +9,8 @@ public record PlantResponseDTO(
         String species,
         String location,
         String notes,
-        LocalDateTime wateringTime,
-        Integer wateringFrequency,
+        String wateringTime,
+        WateringFrequency wateringFrequency,
         Double idealSoilMoisture,
         String imageUrl,
         Device device

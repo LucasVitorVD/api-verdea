@@ -45,7 +45,7 @@ public class PlantService {
         plant.setWateringTime(plantRequestDTO.wateringTime());
         plant.setWateringFrequency(plantRequestDTO.wateringFrequency());
         plant.setIdealSoilMoisture(plantRequestDTO.idealSoilMoisture());
-        plant.setImage_url(plantRequestDTO.imageUrl());
+        plant.setImageUrl(plantRequestDTO.imageUrl());
         plant.setDevice(device);
         plant.setUser(user);
 
@@ -70,7 +70,7 @@ public class PlantService {
                         plant.getWateringTime(),
                         plant.getWateringFrequency(),
                         plant.getIdealSoilMoisture(),
-                        plant.getImage_url(),
+                        plant.getImageUrl(),
                         plant.getDevice()
                 ))
                 .toList();
@@ -110,7 +110,7 @@ public class PlantService {
         plant.setWateringTime(plantRequestDTO.wateringTime());
         plant.setWateringFrequency(plantRequestDTO.wateringFrequency());
         plant.setIdealSoilMoisture(plantRequestDTO.idealSoilMoisture());
-        plant.setImage_url(plantRequestDTO.imageUrl());
+        plant.setImageUrl(plantRequestDTO.imageUrl());
 
         Plant updatedPlant = plantRepository.save(plant);
 
@@ -123,7 +123,7 @@ public class PlantService {
                 updatedPlant.getWateringTime(),
                 updatedPlant.getWateringFrequency(),
                 updatedPlant.getIdealSoilMoisture(),
-                updatedPlant.getImage_url(),
+                updatedPlant.getImageUrl(),
                 updatedPlant.getDevice()
         );
     }

@@ -1,6 +1,7 @@
 package com.verdea.api_verdea.entities;
 
 
+import com.verdea.api_verdea.enums.WateringFrequency;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -32,16 +33,17 @@ public class Plant {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
-    private LocalDateTime wateringTime;
+    private String wateringTime;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Integer wateringFrequency;
+    private WateringFrequency wateringFrequency;
 
     @Column(nullable = false)
     private Double idealSoilMoisture;
 
-    @Column(length = 512)
-    private String image_url;
+    @Column(name = "image_url", length = 512)
+    private String imageUrl;
 
     private LocalDateTime lastWatered;
 
