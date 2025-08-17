@@ -1,6 +1,6 @@
 package com.verdea.api_verdea.dtos.plantDto;
 
-import com.verdea.api_verdea.entities.Device;
+import com.verdea.api_verdea.dtos.deviceDto.DeviceSummary;
 import com.verdea.api_verdea.enums.WateringFrequency;
 
 public record PlantResponseDTO(
@@ -13,6 +13,6 @@ public record PlantResponseDTO(
         WateringFrequency wateringFrequency,
         Double idealSoilMoisture,
         String imageUrl,
-        Device device
+        DeviceSummary device
 ) {
 }

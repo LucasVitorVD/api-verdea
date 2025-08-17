@@ -1,5 +1,6 @@
 package com.verdea.api_verdea.services.plant;
 
+import com.verdea.api_verdea.dtos.deviceDto.DeviceSummary;
 import com.verdea.api_verdea.dtos.plantDto.PlantRequestDTO;
 import com.verdea.api_verdea.dtos.plantDto.PlantResponseDTO;
 import com.verdea.api_verdea.entities.Device;
@@ -61,19 +62,16 @@ public class PlantService {
         List<Plant> plants = plantRepository.findAllByUser(user);
 
         return plants.stream()
-                .map(plant -> new PlantResponseDTO(
-                        plant.getId(),
-                        plant.getName(),
-                        plant.getSpecies(),
-                        plant.getLocation(),
-                        plant.getNotes(),
-                        plant.getWateringTime(),
-                        plant.getWateringFrequency(),
-                        plant.getIdealSoilMoisture(),
-                        plant.getImageUrl(),
-                        plant.getDevice()
-                ))
+                .map(this::mapToPlantResponseDTO)
                 .toList();
+    }
+
+    @Transactional
+    public PlantResponseDTO getPlantById(Long plantId) {
+        Plant plant = plantRepository.findById(plantId)
+                .orElseThrow(() -> new PlantNotFoundException("Planta não encontrada."));
+
+        return mapToPlantResponseDTO(plant);
     }
 
     @Transactional
@@ -114,18 +112,7 @@ public class PlantService {
 
         Plant updatedPlant = plantRepository.save(plant);
 
-        return new PlantResponseDTO(
-                updatedPlant.getId(),
-                updatedPlant.getName(),
-                updatedPlant.getSpecies(),
-                updatedPlant.getLocation(),
-                updatedPlant.getNotes(),
-                updatedPlant.getWateringTime(),
-                updatedPlant.getWateringFrequency(),
-                updatedPlant.getIdealSoilMoisture(),
-                updatedPlant.getImageUrl(),
-                updatedPlant.getDevice()
-        );
+        return mapToPlantResponseDTO(updatedPlant);
     }
 
     @Transactional
@@ -141,5 +128,31 @@ public class PlantService {
         }
 
         plantRepository.delete(plant);
+    }
+
+    private PlantResponseDTO mapToPlantResponseDTO(Plant plant) {
+        DeviceSummary deviceSummary = null;
+
+        if (plant.getDevice() != null) {
+            deviceSummary = new DeviceSummary(
+                    plant.getDevice().getId(),
+                    plant.getDevice().getName(),
+                    plant.getDevice().getMacAddress(),
+                    plant.getDevice().getCreatedAt()
+            );
+        }
+
+        return new PlantResponseDTO(
+                plant.getId(),
+                plant.getName(),
+                plant.getSpecies(),
+                plant.getLocation(),
+                plant.getNotes(),
+                plant.getWateringTime(),
+                plant.getWateringFrequency(),
+                plant.getIdealSoilMoisture(),
+                plant.getImageUrl(),
+                deviceSummary
+        );
     }
 }

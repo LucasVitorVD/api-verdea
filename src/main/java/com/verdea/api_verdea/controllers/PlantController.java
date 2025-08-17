@@ -39,6 +39,11 @@ public class PlantController {
         return ResponseEntity.ok(plants);
     }
 
+    @GetMapping("/{plantId}")
+    public ResponseEntity<PlantResponseDTO> getPlantById(@PathVariable Long plantId) {
+        return ResponseEntity.ok(plantService.getPlantById(plantId));
+    }
+
     @PatchMapping("/update/{id}")
     public ResponseEntity<PlantResponseDTO> updatePlant(@PathVariable Long id, @RequestBody @Valid PlantRequestDTO plantRequestDTO) {
         PlantResponseDTO response = plantService.updatePlantData(id, plantRequestDTO);

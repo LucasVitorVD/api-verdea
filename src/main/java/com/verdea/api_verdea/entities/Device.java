@@ -40,6 +40,5 @@ public class Device {
     private User user;
 
     @OneToOne(mappedBy = "device")
-    @JsonIgnore
     private Plant plant;
 }

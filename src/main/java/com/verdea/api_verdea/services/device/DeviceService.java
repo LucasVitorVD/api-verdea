@@ -3,12 +3,12 @@ package com.verdea.api_verdea.services.device;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceAssignmentResponseDTO;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceRequestDTO;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceResponseDTO;
+import com.verdea.api_verdea.dtos.plantDto.PlantResponseDTO;
+import com.verdea.api_verdea.dtos.plantDto.PlantSummary;
 import com.verdea.api_verdea.entities.Device;
+import com.verdea.api_verdea.entities.Plant;
 import com.verdea.api_verdea.entities.User;
-import com.verdea.api_verdea.exceptions.DeviceAlreadyAssignedException;
-import com.verdea.api_verdea.exceptions.DeviceAlreadyExistsException;
-import com.verdea.api_verdea.exceptions.DeviceNotFoundException;
-import com.verdea.api_verdea.exceptions.UserNotFoundException;
+import com.verdea.api_verdea.exceptions.*;
 import com.verdea.api_verdea.repositories.DeviceRepository;
 import com.verdea.api_verdea.repositories.UserRepository;
 import jakarta.transaction.Transactional;
@@ -46,7 +46,7 @@ public class DeviceService {
 
         Device savedDevice = deviceRepository.save(device);
 
-        return new DeviceResponseDTO(savedDevice.getId(), savedDevice.getName(), savedDevice.getMacAddress(), savedDevice.getCreatedAt());
+        return mapToDeviceResponseDTO(savedDevice);
     }
 
     @Transactional
@@ -72,8 +72,16 @@ public class DeviceService {
         List<Device> devices = deviceRepository.findAllByUser(user);
 
         return devices.stream()
-                .map(device -> new DeviceResponseDTO(device.getId(), device.getName(), device.getMacAddress(), device.getCreatedAt()))
+                .map(this::mapToDeviceResponseDTO)
                 .toList();
+    }
+
+    @Transactional
+    public DeviceResponseDTO getDeviceById(Long deviceId) {
+        Device device = deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new DeviceNotFoundException("Dispositivo não encontrado."));
+
+        return mapToDeviceResponseDTO(device);
     }
 
     @Transactional
@@ -82,5 +90,27 @@ public class DeviceService {
                 .orElseThrow(() -> new DeviceNotFoundException("Dispositivo não encontrado."));
 
         deviceRepository.delete(device);
+    }
+
+    // Método privado para mapear Device para DeviceResponseDTO
+    private DeviceResponseDTO mapToDeviceResponseDTO(Device device) {
+        PlantSummary plantSummary = null;
+
+        if (device.getPlant() != null) {
+            plantSummary = new PlantSummary(
+                    device.getPlant().getId(),
+                    device.getPlant().getName(),
+                    device.getPlant().getSpecies(),
+                    device.getPlant().getImageUrl()
+            );
+        }
+
+        return new DeviceResponseDTO(
+                device.getId(),
+                device.getName(),
+                device.getMacAddress(),
+                device.getCreatedAt(),
+                plantSummary
+        );
     }
 }

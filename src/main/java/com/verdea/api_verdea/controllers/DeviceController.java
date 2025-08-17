@@ -4,6 +4,7 @@ import com.verdea.api_verdea.config.SecurityConfig;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceAssignmentResponseDTO;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceRequestDTO;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceResponseDTO;
+import com.verdea.api_verdea.dtos.plantDto.PlantResponseDTO;
 import com.verdea.api_verdea.services.device.DeviceService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -58,6 +59,11 @@ public class DeviceController {
         List<DeviceResponseDTO> response = deviceService.getDevicesByUserEmail(email);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{deviceId}")
+    public ResponseEntity<DeviceResponseDTO> getDeviceById(@PathVariable Long deviceId) {
+        return ResponseEntity.ok(deviceService.getDeviceById(deviceId));
     }
 
     @DeleteMapping("/delete/{id}")
