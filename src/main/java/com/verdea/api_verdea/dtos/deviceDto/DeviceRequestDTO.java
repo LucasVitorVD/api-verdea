@@ -13,5 +13,8 @@ public record DeviceRequestDTO(
                 regexp = "^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$",
                 message = "Endereço MAC inválido. Formato esperado: XX:XX:XX:XX:XX:XX"
         )
-        String macAddress
+        String macAddress,
+
+        @NotBlank(message = "Endereço IP é obrigatório")
+        String currentIp
 ) {}

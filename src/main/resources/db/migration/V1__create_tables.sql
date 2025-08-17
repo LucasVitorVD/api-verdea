@@ -9,6 +9,7 @@ CREATE TABLE devices (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     mac_address VARCHAR(17) NOT NULL UNIQUE,
+    current_ip VARCHAR(45),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id BIGINT,
     CONSTRAINT fk_device_user FOREIGN KEY (user_id) REFERENCES users(id)

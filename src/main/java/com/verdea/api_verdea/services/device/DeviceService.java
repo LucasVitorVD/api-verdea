@@ -3,10 +3,8 @@ package com.verdea.api_verdea.services.device;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceAssignmentResponseDTO;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceRequestDTO;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceResponseDTO;
-import com.verdea.api_verdea.dtos.plantDto.PlantResponseDTO;
 import com.verdea.api_verdea.dtos.plantDto.PlantSummary;
 import com.verdea.api_verdea.entities.Device;
-import com.verdea.api_verdea.entities.Plant;
 import com.verdea.api_verdea.entities.User;
 import com.verdea.api_verdea.exceptions.*;
 import com.verdea.api_verdea.repositories.DeviceRepository;
@@ -41,6 +39,7 @@ public class DeviceService {
         Device device = Device.builder()
                 .name(name)
                 .macAddress(dto.macAddress())
+                .currentIp(dto.currentIp())
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -85,6 +84,31 @@ public class DeviceService {
     }
 
     @Transactional
+    public void updateDevice(Long deviceId, DeviceRequestDTO dto) {
+        Device device = deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new DeviceNotFoundException("Dispositivo não encontrado."));
+
+        device.setName(dto.name());
+
+        if (dto.macAddress() != null && !dto.macAddress().isBlank() &&
+                !dto.macAddress().equals(device.getMacAddress())) {
+
+            if (deviceRepository.existsByMacAddress(dto.macAddress())) {
+                throw new DeviceAlreadyExistsException("Outro dispositivo com esse MAC já existe");
+            }
+            device.setMacAddress(dto.macAddress());
+        }
+
+        if (dto.currentIp() != null && !dto.currentIp().isBlank()) {
+            device.setCurrentIp(dto.currentIp());
+        }
+
+        Device updatedDevice = deviceRepository.save(device);
+
+        mapToDeviceResponseDTO(updatedDevice);
+    }
+
+    @Transactional
     public void deleteDeviceById(Long id) {
         Device device = deviceRepository.findById(id)
                 .orElseThrow(() -> new DeviceNotFoundException("Dispositivo não encontrado."));
@@ -109,6 +133,7 @@ public class DeviceService {
                 device.getId(),
                 device.getName(),
                 device.getMacAddress(),
+                device.getCurrentIp(),
                 device.getCreatedAt(),
                 plantSummary
         );

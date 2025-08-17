@@ -8,6 +8,7 @@ public record DeviceResponseDTO(
         Long id,
         String name,
         String macAddress,
+        String currentIp,
         LocalDateTime createdAt,
         PlantSummary plantSummary
 ) {}

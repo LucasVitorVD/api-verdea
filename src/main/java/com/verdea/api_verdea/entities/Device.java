@@ -30,6 +30,9 @@ public class Device {
     @Column(name = "mac_address", nullable = false, unique = true)
     private String macAddress;
 
+    @Column(name = "current_ip")
+    private String currentIp;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
