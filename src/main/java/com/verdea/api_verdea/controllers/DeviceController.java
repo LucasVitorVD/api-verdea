@@ -4,7 +4,9 @@ import com.verdea.api_verdea.config.SecurityConfig;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceAssignmentResponseDTO;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceRequestDTO;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceResponseDTO;
+import com.verdea.api_verdea.dtos.deviceDto.SendMacRequest;
 import com.verdea.api_verdea.services.device.DeviceService;
+import com.verdea.api_verdea.services.email.EmailService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -77,5 +79,12 @@ public class DeviceController {
         deviceService.deleteDeviceById(id);
 
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/send-mac")
+    public ResponseEntity<String> sendDeviceMacEmail(@Parameter(hidden = true) Authentication auth, @RequestBody SendMacRequest request) {
+        deviceService.sendEmailWithMacAddress(auth.getName(), request);
+
+        return ResponseEntity.ok("Email enviado com sucesso!");
     }
 }

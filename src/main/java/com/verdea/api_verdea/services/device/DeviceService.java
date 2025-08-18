@@ -3,12 +3,14 @@ package com.verdea.api_verdea.services.device;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceAssignmentResponseDTO;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceRequestDTO;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceResponseDTO;
+import com.verdea.api_verdea.dtos.deviceDto.SendMacRequest;
 import com.verdea.api_verdea.dtos.plantDto.PlantSummary;
 import com.verdea.api_verdea.entities.Device;
 import com.verdea.api_verdea.entities.User;
 import com.verdea.api_verdea.exceptions.*;
 import com.verdea.api_verdea.repositories.DeviceRepository;
 import com.verdea.api_verdea.repositories.UserRepository;
+import com.verdea.api_verdea.services.email.EmailService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import java.util.List;
 public class DeviceService {
     private final DeviceRepository deviceRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     @Transactional
     public DeviceResponseDTO registerDevice(DeviceRequestDTO dto) {
@@ -114,6 +117,20 @@ public class DeviceService {
                 .orElseThrow(() -> new DeviceNotFoundException("Dispositivo não encontrado."));
 
         deviceRepository.delete(device);
+    }
+
+    public void sendEmailWithMacAddress(String email, SendMacRequest macRequest) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
+
+        if (!deviceRepository.existsByMacAddress(macRequest.macAddress())) {
+           throw new DeviceNotFoundException("Dispositivo não encontrado.");
+        };
+
+        String subject = "Seu dispositivo foi registrado!";
+        String body = "Seu dispositivo \"" + macRequest.deviceName() + "\" foi registrado.\nMAC: " + macRequest.macAddress();
+
+        emailService.sendEmail(user.getEmail(), subject, body);
     }
 
     // Método privado para mapear Device para DeviceResponseDTO

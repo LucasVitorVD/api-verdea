@@ -5,9 +5,8 @@ import com.verdea.api_verdea.entities.User;
 import com.verdea.api_verdea.exceptions.UserNotFoundException;
 import com.verdea.api_verdea.repositories.PasswordResetTokenRepository;
 import com.verdea.api_verdea.repositories.UserRepository;
+import com.verdea.api_verdea.services.email.EmailService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,7 @@ public class PasswordResetService {
 
     private final PasswordResetTokenRepository tokenRepo;
     private final UserRepository userRepo;
-    private final JavaMailSender mailSender;
+    private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
     @Async
@@ -37,11 +36,11 @@ public class PasswordResetService {
         tokenRepo.save(resetToken);
 
         String link = "http://localhost:3000/register/reset-password?token=" + token;
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(user.getEmail());
-        message.setSubject("Redefinição de senha");
-        message.setText("Clique no link para redefinir sua senha: " + link);
-        mailSender.send(message);
+        emailService.sendEmail(
+                user.getEmail(),
+                "Redefinição de senha",
+                "Clique no link para redefinir sua senha: " + link
+        );
     }
 
     public void resetPassword(String token, String newPassword) {
