@@ -6,7 +6,6 @@ import com.verdea.api_verdea.dtos.deviceDto.DeviceRequestDTO;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceResponseDTO;
 import com.verdea.api_verdea.dtos.deviceDto.SendMacRequest;
 import com.verdea.api_verdea.services.device.DeviceService;
-import com.verdea.api_verdea.services.email.EmailService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -77,6 +76,13 @@ public class DeviceController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteDevice(@PathVariable Long id) {
         deviceService.deleteDeviceById(id);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset-wifi-mqtt/{deviceId}")
+    public ResponseEntity<Void> resetWifiByMqtt(@PathVariable Long deviceId) {
+        deviceService.resetWifiMqtt(deviceId);
 
         return ResponseEntity.ok().build();
     }

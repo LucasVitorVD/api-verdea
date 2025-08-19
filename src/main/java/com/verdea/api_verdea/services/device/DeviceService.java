@@ -11,6 +11,7 @@ import com.verdea.api_verdea.exceptions.*;
 import com.verdea.api_verdea.repositories.DeviceRepository;
 import com.verdea.api_verdea.repositories.UserRepository;
 import com.verdea.api_verdea.services.email.EmailService;
+import com.verdea.api_verdea.services.mqtt.MqttService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class DeviceService {
     private final DeviceRepository deviceRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final MqttService mqttService;
 
     @Transactional
     public DeviceResponseDTO registerDevice(DeviceRequestDTO dto) {
@@ -117,6 +119,16 @@ public class DeviceService {
                 .orElseThrow(() -> new DeviceNotFoundException("Dispositivo não encontrado."));
 
         deviceRepository.delete(device);
+    }
+
+    public void resetWifiMqtt(Long id) {
+        Device device = deviceRepository.findById(id)
+                .orElseThrow(() -> new DeviceNotFoundException("Dispositivo não encontrado."));
+
+        String topic = "verdea/commands/" + device.getMacAddress().replace(":", "");
+        String payload = "RESET_WIFI";
+
+        mqttService.publish(topic, payload);
     }
 
     public void sendEmailWithMacAddress(String email, SendMacRequest macRequest) {

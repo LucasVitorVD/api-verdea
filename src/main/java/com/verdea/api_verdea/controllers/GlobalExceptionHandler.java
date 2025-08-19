@@ -108,6 +108,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
     }
 
+    @ExceptionHandler(MqttCommunicationException.class)
+    public ResponseEntity<ApiError> handleMqttCommunicationException(MqttCommunicationException ex) {
+        ApiError error = new ApiError(
+                LocalDateTime.now(),
+                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                "MQTT Communication Error",
+                "Não foi possível se comunicar com o broker MQTT. Verifique a conexão do servidor."
+        );
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGenericException(Exception ex) {
         ApiError error = new ApiError(
