@@ -14,18 +14,28 @@ import com.verdea.api_verdea.services.email.EmailService;
 import com.verdea.api_verdea.services.mqtt.MqttService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class DeviceService {
     private final DeviceRepository deviceRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final MqttService mqttService;
+
+    @Autowired
+    public DeviceService(DeviceRepository deviceRepository, UserRepository userRepository, EmailService emailService, @Lazy MqttService mqttService) {
+        this.deviceRepository = deviceRepository;
+        this.userRepository = userRepository;
+        this.emailService = emailService;
+        this.mqttService = mqttService;
+    }
 
     @Transactional
     public DeviceResponseDTO registerDevice(DeviceRequestDTO dto) {
