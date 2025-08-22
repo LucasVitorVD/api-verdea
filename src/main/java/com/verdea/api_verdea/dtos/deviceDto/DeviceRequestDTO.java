@@ -16,5 +16,8 @@ public record DeviceRequestDTO(
         String macAddress,
 
         @NotBlank(message = "Endereço IP é obrigatório")
-        String currentIp
+        String currentIp,
+
+        @NotBlank(message = "Status é obrigatório")
+        String status
 ) {}

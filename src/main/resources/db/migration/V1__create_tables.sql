@@ -10,6 +10,7 @@ CREATE TABLE devices (
     name VARCHAR(255) NOT NULL,
     mac_address VARCHAR(17) NOT NULL UNIQUE,
     current_ip VARCHAR(45),
+    status VARCHAR(20) DEFAULT 'offline' NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id BIGINT,
     CONSTRAINT fk_device_user FOREIGN KEY (user_id) REFERENCES users(id)

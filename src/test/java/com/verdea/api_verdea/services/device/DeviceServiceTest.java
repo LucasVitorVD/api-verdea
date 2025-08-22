@@ -60,7 +60,7 @@ class DeviceServiceTest {
     @Test
     @DisplayName("Should add new device")
     void registerDeviceCase1() {
-        DeviceRequestDTO deviceRequestDTO = new DeviceRequestDTO(device.getName(), device.getMacAddress(), device.getCurrentIp());
+        DeviceRequestDTO deviceRequestDTO = new DeviceRequestDTO(device.getName(), device.getMacAddress(), device.getCurrentIp(), DeviceStatus.ONLINE.name());
 
         when(deviceRepository.existsByMacAddress(device.getMacAddress())).thenReturn(false);
         when(deviceRepository.save(any(Device.class))).thenReturn(device);
@@ -74,7 +74,7 @@ class DeviceServiceTest {
     @Test
     @DisplayName("Should throw error if device already exists")
     void registerDeviceCase2() {
-        DeviceRequestDTO deviceRequestDTO = new DeviceRequestDTO(device.getName(), device.getMacAddress(), device.getCurrentIp());
+        DeviceRequestDTO deviceRequestDTO = new DeviceRequestDTO(device.getName(), device.getMacAddress(), device.getCurrentIp(), DeviceStatus.ONLINE.name());
 
         when(deviceRepository.existsByMacAddress(device.getMacAddress())).thenReturn(true);
 

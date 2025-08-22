@@ -7,6 +7,7 @@ import com.verdea.api_verdea.dtos.deviceDto.SendMacRequest;
 import com.verdea.api_verdea.dtos.plantDto.PlantSummary;
 import com.verdea.api_verdea.entities.Device;
 import com.verdea.api_verdea.entities.User;
+import com.verdea.api_verdea.enums.DeviceStatus;
 import com.verdea.api_verdea.exceptions.*;
 import com.verdea.api_verdea.repositories.DeviceRepository;
 import com.verdea.api_verdea.repositories.UserRepository;
@@ -55,6 +56,7 @@ public class DeviceService {
                 .name(name)
                 .macAddress(dto.macAddress())
                 .currentIp(dto.currentIp())
+                .status(DeviceStatus.ONLINE)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -123,6 +125,14 @@ public class DeviceService {
         mapToDeviceResponseDTO(updatedDevice);
     }
 
+    public void updateDeviceStatus(String macAddress, DeviceStatus newStatus) {
+        Device device = deviceRepository.findByMacAddress(macAddress)
+                .orElseThrow(() -> new DeviceNotFoundException("Dispositivo não encontrado."));
+
+        device.setStatus(newStatus);
+        deviceRepository.save(device);
+    }
+
     @Transactional
     public void deleteDeviceById(Long id) {
         Device device = deviceRepository.findById(id)
@@ -168,12 +178,15 @@ public class DeviceService {
             );
         }
 
+        boolean isOnline = device.getStatus() == DeviceStatus.ONLINE;
+
         return new DeviceResponseDTO(
                 device.getId(),
                 device.getName(),
                 device.getMacAddress(),
                 device.getCurrentIp(),
                 device.getCreatedAt(),
+                isOnline,
                 plantSummary
         );
     }

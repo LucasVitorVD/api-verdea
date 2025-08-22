@@ -10,5 +10,6 @@ public record DeviceResponseDTO(
         String macAddress,
         String currentIp,
         LocalDateTime createdAt,
+        boolean isOnline,
         PlantSummary plantSummary
 ) {}

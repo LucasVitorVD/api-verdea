@@ -2,6 +2,7 @@ package com.verdea.api_verdea.services.mqtt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceRequestDTO;
+import com.verdea.api_verdea.enums.DeviceStatus;
 import com.verdea.api_verdea.exceptions.MqttCommunicationException;
 import com.verdea.api_verdea.services.device.DeviceService;
 import jakarta.annotation.PostConstruct;
@@ -9,7 +10,10 @@ import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.*;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -19,8 +23,8 @@ public class MqttService {
 
     private final MqttClient mqttClient;
     private final MqttConnectOptions mqttConnectOptions;
-    private final String clientIdentifier = "verdea-backend";
     private static final String TOPIC_REGISTRATION = "verdea/device/register";
+    private static final String TOPIC_STATUS_WILDCARD = "verdea/status/#";
 
     @PostConstruct
     public void init() {
@@ -47,7 +51,9 @@ public class MqttService {
                 log.info("Iniciando conexão com o broker MQTT...");
                 mqttClient.connect(mqttConnectOptions);
                 mqttClient.subscribe(TOPIC_REGISTRATION, 1);
-                log.info("✅ Conectado e inscrito no tópico de registro: {}", TOPIC_REGISTRATION);            }
+                mqttClient.subscribe(TOPIC_STATUS_WILDCARD, 1);
+                log.info("✅ Conectado e inscrito nos tópicos: {}, {}", TOPIC_REGISTRATION, TOPIC_STATUS_WILDCARD);
+            }
         } catch (MqttException e) {
             log.error("❌ Falha crítica na conexão MQTT: {}", e.getMessage());
             throw new MqttCommunicationException("Falha na inicialização do serviço MQTT", e);
@@ -59,17 +65,38 @@ public class MqttService {
         log.info("📩 Mensagem recebida no tópico '{}': {}", topic, payloadString);
 
         if (topic.equals(TOPIC_REGISTRATION)) {
-            try {
-                // Converte a mensagem JSON para um DTO de registro
-                ObjectMapper objectMapper = new ObjectMapper();
-                DeviceRequestDTO deviceDto = objectMapper.readValue(payloadString, DeviceRequestDTO.class);
+            handleDeviceRegistration(payloadString);
+        }
 
-                // Usa o serviço de dispositivo para registrar
-                deviceService.registerDevice(deviceDto);
-                log.info("✅ Dispositivo com MAC '{}' registrado com sucesso.", deviceDto.macAddress());
-            } catch (Exception e) {
-                log.error("❌ Erro ao processar mensagem de registro: {}", e.getMessage());
+        if (topic.startsWith("verdea/status/")) {
+            handleStatusUpdate(payloadString);
+        }
+    }
+
+    private void handleDeviceRegistration(String payloadString) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            DeviceRequestDTO deviceDto = objectMapper.readValue(payloadString, DeviceRequestDTO.class);
+            deviceService.registerDevice(deviceDto);
+            log.info("✅ Dispositivo com MAC '{}' registrado com sucesso.", deviceDto.macAddress());
+        } catch (Exception e) {
+            log.error("❌ Erro ao processar mensagem de registro: {}", e.getMessage());
+        }
+    }
+
+    private void handleStatusUpdate(String payloadString) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map statusData = objectMapper.readValue(payloadString, Map.class);
+            String macAddress = statusData.get("macAddress").toString();
+            String status = statusData.get("status").toString();
+
+            if (macAddress != null && status != null) {
+                deviceService.updateDeviceStatus(macAddress, DeviceStatus.valueOf(status.toUpperCase()));
+                log.info("✅ Status do dispositivo '{}' atualizado para '{}' no banco de dados.", macAddress, status);
             }
+        } catch (Exception e) {
+            log.error("❌ Erro ao processar mensagem de status: {}", e.getMessage());
         }
     }
 

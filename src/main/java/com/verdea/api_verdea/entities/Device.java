@@ -1,6 +1,7 @@
 package com.verdea.api_verdea.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.verdea.api_verdea.enums.DeviceStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -32,6 +33,10 @@ public class Device {
 
     @Column(name = "current_ip")
     private String currentIp;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private DeviceStatus status;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
