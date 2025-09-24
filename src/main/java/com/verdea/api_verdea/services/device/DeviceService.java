@@ -151,16 +151,12 @@ public class DeviceService {
         mqttService.publish(topic, payload);
     }
 
-    public void sendEmailWithMacAddress(String email, SendMacRequest macRequest) {
-        User user = userRepository.findByEmail(email)
+    public void sendEmailWithMacAddress(SendMacRequest macRequest) {
+        User user = userRepository.findByEmail(macRequest.email())
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
 
-        if (!deviceRepository.existsByMacAddress(macRequest.macAddress())) {
-           throw new DeviceNotFoundException("Dispositivo não encontrado.");
-        };
-
-        String subject = "Seu dispositivo foi registrado!";
-        String body = "Seu dispositivo \"" + macRequest.deviceName() + "\" foi registrado.\nMAC: " + macRequest.macAddress();
+        String subject = "Dados do dispositivo";
+        String body = "Nome do dispositivo: \"" + macRequest.deviceName() + "\nMAC: " + macRequest.macAddress();
 
         emailService.sendEmail(user.getEmail(), subject, body);
     }

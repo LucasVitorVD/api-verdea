@@ -40,10 +40,12 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
                                 .requestMatchers("/api/csrf").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/device/add").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/device/send-mac").permitAll()
                                 .requestMatchers("/v3/api-docs/**", "swagger-ui/**", "swagger-ui.html").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/device/send-mac")
                         .ignoringRequestMatchers("/api/device/add")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())

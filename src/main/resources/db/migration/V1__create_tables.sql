@@ -13,7 +13,7 @@ CREATE TABLE devices (
     status VARCHAR(20) DEFAULT 'offline' NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id BIGINT,
-    CONSTRAINT fk_device_user FOREIGN KEY (user_id) REFERENCES users(id)
+    CONSTRAINT fk_device_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE plants (
@@ -30,8 +30,8 @@ CREATE TABLE plants (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id BIGINT NOT NULL,
     device_id BIGINT NOT NULL UNIQUE,
-    CONSTRAINT fk_plant_user FOREIGN KEY (user_id) REFERENCES users(id),
-    CONSTRAINT fk_plant_device FOREIGN KEY (device_id) REFERENCES devices(id)
+    CONSTRAINT fk_plant_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_plant_device FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
 );
 
 CREATE TABLE irrigation_history (
@@ -43,8 +43,8 @@ CREATE TABLE irrigation_history (
     timestamp TIMESTAMP NOT NULL,
     plant_id BIGINT NOT NULL,
     device_id BIGINT NOT NULL,
-    CONSTRAINT fk_irrigation_plant FOREIGN KEY (plant_id) REFERENCES plants(id),
-    CONSTRAINT fk_irrigation_device FOREIGN KEY (device_id) REFERENCES devices(id)
+    CONSTRAINT fk_irrigation_plant FOREIGN KEY (plant_id) REFERENCES plants(id) ON DELETE CASCADE,
+    CONSTRAINT fk_irrigation_device FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
 );
 
 CREATE TABLE notifications (
@@ -56,7 +56,7 @@ CREATE TABLE notifications (
     priority VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id BIGINT NOT NULL,
-    CONSTRAINT fk_notification_user FOREIGN KEY (user_id) REFERENCES users(id)
+    CONSTRAINT fk_notification_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE password_reset_tokens (

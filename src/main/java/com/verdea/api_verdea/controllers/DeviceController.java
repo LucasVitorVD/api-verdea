@@ -88,8 +88,8 @@ public class DeviceController {
     }
 
     @PostMapping("/send-mac")
-    public ResponseEntity<String> sendDeviceMacEmail(@Parameter(hidden = true) Authentication auth, @RequestBody SendMacRequest request) {
-        deviceService.sendEmailWithMacAddress(auth.getName(), request);
+    public ResponseEntity<String> sendDeviceMacEmail(@RequestBody SendMacRequest request) {
+        deviceService.sendEmailWithMacAddress(request);
 
         return ResponseEntity.ok("Email enviado com sucesso!");
     }
