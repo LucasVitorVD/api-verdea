@@ -2,6 +2,7 @@ package com.verdea.api_verdea.services.mqtt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceRequestDTO;
+import com.verdea.api_verdea.dtos.plantDto.PlantResponseDTO;
 import com.verdea.api_verdea.enums.DeviceStatus;
 import com.verdea.api_verdea.exceptions.MqttCommunicationException;
 import com.verdea.api_verdea.services.device.DeviceService;
@@ -97,6 +98,28 @@ public class MqttService {
             }
         } catch (Exception e) {
             log.error("❌ Erro ao processar mensagem de status: {}", e.getMessage());
+        }
+    }
+
+    public void sendPlantConfigToDevice(String deviceMacAddress, PlantResponseDTO plant) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            String payload = objectMapper.writeValueAsString(Map.of(
+                    "mode", plant.mode(),
+                    "wateringTime", plant.wateringTime(),
+                    "wateringFrequency", plant.wateringFrequency(),
+                    "idealSoilMoisture", plant.idealSoilMoisture()
+            ));
+
+            String cleanMac = deviceMacAddress.replace(":", "");
+            String topic = "verdea/commands/" + cleanMac;
+
+            publish(topic, payload);
+            log.info("✅ Configuração de irrigação enviada para dispositivo '{}'", deviceMacAddress);
+        } catch (Exception e) {
+            log.error("❌ Erro ao enviar configuração de irrigação para '{}': {}", deviceMacAddress, e.getMessage());
+            throw new MqttCommunicationException("Erro ao enviar configuração de irrigação", e);
         }
     }
 

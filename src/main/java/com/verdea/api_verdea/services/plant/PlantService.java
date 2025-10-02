@@ -13,6 +13,7 @@ import com.verdea.api_verdea.exceptions.UserNotFoundException;
 import com.verdea.api_verdea.repositories.DeviceRepository;
 import com.verdea.api_verdea.repositories.PlantRepository;
 import com.verdea.api_verdea.repositories.UserRepository;
+import com.verdea.api_verdea.services.mqtt.MqttService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class PlantService {
     private final PlantRepository plantRepository;
     private final DeviceRepository deviceRepository;
     private final UserRepository userRepository;
+    private final MqttService mqttService;
 
     @Transactional
     public void addPlant(PlantRequestDTO plantRequestDTO, String userEmail) {
@@ -46,13 +48,16 @@ public class PlantService {
         plant.setWateringTime(plantRequestDTO.wateringTime());
         plant.setWateringFrequency(plantRequestDTO.wateringFrequency());
         plant.setIdealSoilMoisture(plantRequestDTO.idealSoilMoisture());
+        plant.setMode(plantRequestDTO.mode());
         plant.setImageUrl(plantRequestDTO.imageUrl());
         plant.setDevice(device);
         plant.setUser(user);
 
         device.setPlant(plant);
 
-        plantRepository.save(plant);
+        Plant savedPlant = plantRepository.save(plant);
+
+        mqttService.sendPlantConfigToDevice(device.getMacAddress(), mapToPlantResponseDTO(savedPlant));
     }
 
     public List<PlantResponseDTO> getPlantsByUserEmail(String email) {
@@ -108,9 +113,17 @@ public class PlantService {
         plant.setWateringTime(plantRequestDTO.wateringTime());
         plant.setWateringFrequency(plantRequestDTO.wateringFrequency());
         plant.setIdealSoilMoisture(plantRequestDTO.idealSoilMoisture());
+        plant.setMode(plantRequestDTO.mode());
         plant.setImageUrl(plantRequestDTO.imageUrl());
 
         Plant updatedPlant = plantRepository.save(plant);
+
+        if (updatedPlant.getDevice() != null) {
+            mqttService.sendPlantConfigToDevice(
+                    updatedPlant.getDevice().getMacAddress(),
+                    mapToPlantResponseDTO(updatedPlant)
+            );
+        }
 
         return mapToPlantResponseDTO(updatedPlant);
     }
@@ -120,8 +133,15 @@ public class PlantService {
         Plant plant = plantRepository.findById(plantId)
                 .orElseThrow(() -> new PlantNotFoundException("Planta não encontrada."));
 
-        if (plant.getDevice() != null) {
-            Device device = plant.getDevice();
+        Device device = plant.getDevice();
+
+        if (device != null) {
+            String cleanMac = device.getMacAddress().replace(":", "");
+            mqttService.publish(
+                    "verdea/commands/" + cleanMac,
+                    "{ \"command\": \"DELETE_PLANT\" }"
+            );
+
             plant.setDevice(null);
             device.setPlant(null);
             deviceRepository.save(device);
@@ -151,6 +171,7 @@ public class PlantService {
                 plant.getWateringTime(),
                 plant.getWateringFrequency(),
                 plant.getIdealSoilMoisture(),
+                plant.getMode(),
                 plant.getImageUrl(),
                 deviceSummary
         );
