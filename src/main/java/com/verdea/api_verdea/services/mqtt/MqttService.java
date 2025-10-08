@@ -1,5 +1,6 @@
 package com.verdea.api_verdea.services.mqtt;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceRequestDTO;
 import com.verdea.api_verdea.dtos.plantDto.PlantResponseDTO;
@@ -14,6 +15,7 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -39,7 +41,7 @@ public class MqttService {
 
                 @Override
                 public void messageArrived(String topic, MqttMessage message) throws Exception {
-                    handleIncomingMessage(topic, message.getPayload());
+                    handleIncomingMessage(topic, message);
                 }
 
                 @Override
@@ -61,8 +63,8 @@ public class MqttService {
         }
     }
 
-    private void handleIncomingMessage(String topic, byte[] payload) {
-        String payloadString = new String(payload);
+    private void handleIncomingMessage(String topic, MqttMessage message) {
+        String payloadString = new String(message.getPayload());
         log.info("📩 Mensagem recebida no tópico '{}': {}", topic, payloadString);
 
         if (topic.equals(TOPIC_REGISTRATION)) {
@@ -70,7 +72,7 @@ public class MqttService {
         }
 
         if (topic.startsWith("verdea/status/")) {
-            handleStatusUpdate(payloadString);
+            handleStatusUpdate(payloadString, message.isRetained());
         }
     }
 
@@ -85,7 +87,13 @@ public class MqttService {
         }
     }
 
-    private void handleStatusUpdate(String payloadString) {
+    private void handleStatusUpdate(String payloadString, boolean isRetained) {
+        if (isRetained) {
+            log.info("⚠️ Mensagem de status retida (LWT) ignorada na inicialização do backend.");
+
+            return;
+        }
+
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Map statusData = objectMapper.readValue(payloadString, Map.class);
@@ -103,14 +111,22 @@ public class MqttService {
 
     public void sendPlantConfigToDevice(String deviceMacAddress, PlantResponseDTO plant) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> payloadMap = new HashMap<>();
+            payloadMap.put("mode", plant.mode());
 
-            String payload = objectMapper.writeValueAsString(Map.of(
-                    "mode", plant.mode(),
-                    "wateringTime", plant.wateringTime(),
-                    "wateringFrequency", plant.wateringFrequency(),
-                    "idealSoilMoisture", plant.idealSoilMoisture()
-            ));
+            if (plant.wateringTimes() != null && !plant.wateringTimes().isEmpty()) {
+                payloadMap.put("wateringTimes", plant.wateringTimes());
+            }
+            if (plant.wateringFrequency() != null) {
+                payloadMap.put("wateringFrequency", plant.wateringFrequency());
+            }
+            if (plant.idealSoilMoisture() != null) {
+                payloadMap.put("idealSoilMoisture", plant.idealSoilMoisture());
+            }
+
+            ObjectMapper objectMapper = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+            String payload = objectMapper.writeValueAsString(payloadMap);
 
             String cleanMac = deviceMacAddress.replace(":", "");
             String topic = "verdea/commands/" + cleanMac;

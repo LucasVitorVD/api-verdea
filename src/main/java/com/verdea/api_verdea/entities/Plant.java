@@ -1,6 +1,5 @@
 package com.verdea.api_verdea.entities;
 
-
 import com.verdea.api_verdea.enums.WateringFrequency;
 import com.verdea.api_verdea.enums.WateringMode;
 import jakarta.persistence.*;
@@ -8,6 +7,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "plants")
@@ -38,8 +39,6 @@ public class Plant {
     @Column(nullable = false)
     private WateringMode mode;
 
-    private String wateringTime;
-
     @Enumerated(EnumType.STRING)
     private WateringFrequency wateringFrequency;
 
@@ -52,6 +51,9 @@ public class Plant {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PlantWateringTime> wateringTimes = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

@@ -14,8 +14,6 @@ import com.verdea.api_verdea.repositories.UserRepository;
 import com.verdea.api_verdea.services.email.EmailService;
 import com.verdea.api_verdea.services.mqtt.MqttService;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;

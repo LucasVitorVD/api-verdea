@@ -23,8 +23,7 @@ CREATE TABLE plants (
     location VARCHAR(255),
     notes TEXT,
     mode VARCHAR(20) NOT NULL DEFAULT 'AUTO',
-    watering_time VARCHAR(10),
-    watering_frequency VARCHAR(50),
+    watering_frequency VARCHAR(50) DEFAULT 'once_a_day',
     ideal_soil_moisture DOUBLE PRECISION,
     image_url VARCHAR(512),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -32,6 +31,14 @@ CREATE TABLE plants (
     device_id BIGINT NOT NULL UNIQUE,
     CONSTRAINT fk_plant_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_plant_device FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
+);
+
+CREATE TABLE plant_watering_times (
+    id SERIAL PRIMARY KEY,
+    plant_id BIGINT NOT NULL,
+    watering_time VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_watering_plant FOREIGN KEY (plant_id) REFERENCES plants(id) ON DELETE CASCADE
 );
 
 CREATE TABLE irrigation_history (

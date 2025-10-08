@@ -5,6 +5,7 @@ import com.verdea.api_verdea.dtos.plantDto.PlantRequestDTO;
 import com.verdea.api_verdea.dtos.plantDto.PlantResponseDTO;
 import com.verdea.api_verdea.entities.Device;
 import com.verdea.api_verdea.entities.Plant;
+import com.verdea.api_verdea.entities.PlantWateringTime;
 import com.verdea.api_verdea.entities.User;
 import com.verdea.api_verdea.exceptions.DeviceAlreadyAssignedException;
 import com.verdea.api_verdea.exceptions.DeviceNotFoundException;
@@ -45,13 +46,21 @@ public class PlantService {
         plant.setSpecies(plantRequestDTO.species());
         plant.setLocation(plantRequestDTO.location());
         plant.setNotes(plantRequestDTO.notes());
-        plant.setWateringTime(plantRequestDTO.wateringTime());
         plant.setWateringFrequency(plantRequestDTO.wateringFrequency());
         plant.setIdealSoilMoisture(plantRequestDTO.idealSoilMoisture());
         plant.setMode(plantRequestDTO.mode());
         plant.setImageUrl(plantRequestDTO.imageUrl());
         plant.setDevice(device);
         plant.setUser(user);
+
+        if (plantRequestDTO.wateringTimes() != null) {
+            plantRequestDTO.wateringTimes().forEach(time -> {
+                PlantWateringTime plantWateringTime = new PlantWateringTime();
+                plantWateringTime.setWateringTime(time);
+                plant.getWateringTimes().add(plantWateringTime);
+                plantWateringTime.setPlant(plant);
+            });
+        }
 
         device.setPlant(plant);
 
@@ -110,11 +119,21 @@ public class PlantService {
         plant.setSpecies(plantRequestDTO.species());
         plant.setLocation(plantRequestDTO.location());
         plant.setNotes(plantRequestDTO.notes());
-        plant.setWateringTime(plantRequestDTO.wateringTime());
         plant.setWateringFrequency(plantRequestDTO.wateringFrequency());
         plant.setIdealSoilMoisture(plantRequestDTO.idealSoilMoisture());
         plant.setMode(plantRequestDTO.mode());
         plant.setImageUrl(plantRequestDTO.imageUrl());
+
+        plant.getWateringTimes().clear();
+
+        if (plantRequestDTO.wateringTimes() != null) {
+            plantRequestDTO.wateringTimes().forEach(time -> {
+                PlantWateringTime wateringTime = new PlantWateringTime();
+                wateringTime.setWateringTime(time);
+                wateringTime.setPlant(plant);
+                plant.getWateringTimes().add(wateringTime);
+            });
+        }
 
         Plant updatedPlant = plantRepository.save(plant);
 
@@ -162,13 +181,18 @@ public class PlantService {
             );
         }
 
+        List<String> wateringTimes = plant.getWateringTimes()
+                .stream()
+                .map(PlantWateringTime::getWateringTime)
+                .toList();
+
         return new PlantResponseDTO(
                 plant.getId(),
                 plant.getName(),
                 plant.getSpecies(),
                 plant.getLocation(),
                 plant.getNotes(),
-                plant.getWateringTime(),
+                wateringTimes,
                 plant.getWateringFrequency(),
                 plant.getIdealSoilMoisture(),
                 plant.getMode(),
