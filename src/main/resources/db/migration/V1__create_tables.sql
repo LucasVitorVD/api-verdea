@@ -43,10 +43,10 @@ CREATE TABLE plant_watering_times (
 
 CREATE TABLE irrigation_history (
     id SERIAL PRIMARY KEY,
-    water_level_percent DOUBLE PRECISION NOT NULL,
     soil_moisture DOUBLE PRECISION NOT NULL,
     mode VARCHAR(20) NOT NULL DEFAULT 'AUTO',
-    timestamp TIMESTAMP NOT NULL,
+    duration_seconds INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     plant_id BIGINT NOT NULL,
     device_id BIGINT NOT NULL,
     CONSTRAINT fk_irrigation_plant FOREIGN KEY (plant_id) REFERENCES plants(id) ON DELETE CASCADE,

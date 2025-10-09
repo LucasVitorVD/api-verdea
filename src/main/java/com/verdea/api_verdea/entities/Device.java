@@ -8,6 +8,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "devices")
@@ -49,4 +51,7 @@ public class Device {
 
     @OneToOne(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true)
     private Plant plant;
+
+    @OneToMany(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<IrrigationHistory> irrigationHistory = new ArrayList<>();
 }

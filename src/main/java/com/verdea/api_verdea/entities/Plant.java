@@ -55,6 +55,9 @@ public class Plant {
     @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PlantWateringTime> wateringTimes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "plant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<IrrigationHistory> irrigationHistory = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
