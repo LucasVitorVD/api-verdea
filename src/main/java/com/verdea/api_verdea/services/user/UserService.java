@@ -4,6 +4,7 @@ import com.verdea.api_verdea.dtos.userDto.UpdateUserRequestDTO;
 import com.verdea.api_verdea.dtos.userDto.UserRequestDTO;
 import com.verdea.api_verdea.dtos.userDto.UserResponseDTO;
 import com.verdea.api_verdea.entities.User;
+import com.verdea.api_verdea.enums.Role;
 import com.verdea.api_verdea.exceptions.EmailAlreadyInUseException;
 import com.verdea.api_verdea.exceptions.UserNotFoundException;
 import com.verdea.api_verdea.mappers.UserMapper;
@@ -29,6 +30,7 @@ public class UserService {
         User newUser = new User();
         newUser.setEmail(dto.email());
         newUser.setPassword(passwordEncoder.encode(dto.password()));
+        newUser.setRole(dto.role());
 
         User savedUser = userRepository.save(newUser);
 

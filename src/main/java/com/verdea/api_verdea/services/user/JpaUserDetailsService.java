@@ -19,6 +19,7 @@ public class JpaUserDetailsService implements UserDetailsService {
         return userRepository.findByEmail(username).map(user -> User.builder()
                 .username(username)
                 .password(user.getPassword())
+                .authorities(user.getAuthorities())
                 .build()
         ).orElseThrow(() -> new UsernameNotFoundException("Usuário com o email " + username + " não encontrado."));
     }

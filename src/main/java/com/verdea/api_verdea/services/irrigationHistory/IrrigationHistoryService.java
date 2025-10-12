@@ -8,6 +8,7 @@ import com.verdea.api_verdea.entities.IrrigationHistory;
 import com.verdea.api_verdea.entities.Plant;
 import com.verdea.api_verdea.entities.User;
 import com.verdea.api_verdea.exceptions.DeviceNotFoundException;
+import com.verdea.api_verdea.exceptions.HistoryNotFoundException;
 import com.verdea.api_verdea.exceptions.PlantNotFoundException;
 import com.verdea.api_verdea.exceptions.UserNotFoundException;
 import com.verdea.api_verdea.repositories.DeviceRepository;
@@ -54,6 +55,12 @@ public class IrrigationHistoryService {
         Page<IrrigationHistory> irrigationHistoryPage = historyRepository.findAllByUserId(user.getId(), pageable);
 
         return irrigationHistoryPage.map(this::mapToResponseDTO);
+    }
+
+    public void deleteHistory(Long id) {
+        IrrigationHistory history = historyRepository.findById(id).orElseThrow(() -> new HistoryNotFoundException("Historico não encontrado"));
+
+        historyRepository.delete(history);
     }
 
     private IrrigationHistoryResponseDTO mapToResponseDTO(IrrigationHistory history) {

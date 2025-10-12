@@ -37,4 +37,11 @@ public class IrrigationHistoryController {
 
         return ResponseEntity.ok(irrigationHistoryPage);
     }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteIrrigationHistory(@PathVariable Long id) {
+        irrigationHistoryService.deleteHistory(id);
+
+        return ResponseEntity.ok().build();
+    }
 }

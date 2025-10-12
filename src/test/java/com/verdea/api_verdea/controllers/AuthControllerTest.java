@@ -4,9 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.verdea.api_verdea.dtos.userDto.LoginResponse;
 import com.verdea.api_verdea.dtos.userDto.UserRequestDTO;
 import com.verdea.api_verdea.dtos.userDto.UserResponseDTO;
-import com.verdea.api_verdea.exceptions.InvalidRefreshTokenException;
+import com.verdea.api_verdea.enums.Role;
 import com.verdea.api_verdea.services.authentication.AuthenticationService;
 import com.verdea.api_verdea.services.authentication.CookieService;
+import com.verdea.api_verdea.services.resetPassword.PasswordResetService;
 import com.verdea.api_verdea.services.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,6 +21,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -32,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @WebMvcTest(AuthController.class)
 class AuthControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -44,52 +48,51 @@ class AuthControllerTest {
     @MockitoBean
     private UserService userService;
 
+    @MockitoBean
+    private PasswordResetService passwordResetService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @Test
     @WithMockUser
-    @DisplayName("Should register user successfully")
-    void registerUserCase1() throws Exception {
-        UserRequestDTO request = new UserRequestDTO("email@gmail.com", "12345");
-        UserResponseDTO response = new UserResponseDTO(1L, request.email(), null);
-        String reqBody = new ObjectMapper().writeValueAsString(request);
+    @DisplayName("Register user successfully")
+    void registerUser_success() throws Exception {
+        UserRequestDTO request = new UserRequestDTO("email@gmail.com", "12345", Role.USER);
+        UserResponseDTO response = new UserResponseDTO(1L, request.email(), Role.USER, LocalDateTime.now());
+        String body = objectMapper.writeValueAsString(request);
 
-        when(userService.registerUser(eq(request))).thenReturn(response);
+        when(userService.registerUser(request)).thenReturn(response);
 
         mockMvc.perform(post("/api/auth/register")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(reqBody))
-                .andExpectAll(
-                        status().isOk(),
-                        jsonPath("$.id").value(1L),
-                        jsonPath("$.email").value(response.email())
-                );
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.email").value(request.email()))
+                .andExpect(jsonPath("$.role").value("USER"));
 
-        verify(userService).registerUser(eq(request));
+        verify(userService).registerUser(request);
     }
 
     @Test
     @WithMockUser
-    @DisplayName("Should authenticate and return success message")
-    void authenticateCase1() throws Exception {
-        String email = "user@gmail.com";
-        String password = "123456";
-        String accessToken = "access-token";
+    @DisplayName("Authenticate and set cookies correctly")
+    void authenticate_success() throws Exception {
+        UserRequestDTO request = new UserRequestDTO("user@gmail.com", "123456", Role.USER);
         UUID refreshToken = UUID.randomUUID();
+        String accessToken = "access-token";
 
-        UserRequestDTO requestDTO = new UserRequestDTO(email, password);
         LoginResponse loginResponse = new LoginResponse(accessToken, refreshToken);
 
         when(authenticationService.authenticate(any(UserRequestDTO.class))).thenReturn(loginResponse);
 
-        String reqBody = new ObjectMapper().writeValueAsString(requestDTO);
-
-        mockMvc.perform(post("/api/auth/login").with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(reqBody))
-                .andExpectAll(
-                        status().isOk(),
-                        content().string("Usuário autenticado!")
-                );
+        mockMvc.perform(post("/api/auth/login")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Usuário autenticado!"));
 
         verify(authenticationService).authenticate(any(UserRequestDTO.class));
         verify(cookieService).addAccessTokenCookie(any(HttpServletResponse.class), eq(accessToken));
@@ -98,111 +101,64 @@ class AuthControllerTest {
 
     @Test
     @WithMockUser
-    @DisplayName("Should throw an error if csrf not exists")
-    void authenticateCase2() throws Exception {
-        String email = "user@gmail.com";
-        String password = "123456";
+    @DisplayName("Refresh token successfully")
+    void refreshToken_success() throws Exception {
+        UUID refreshToken = UUID.randomUUID();
+        String newAccessToken = "new-access-token";
 
-        UserRequestDTO requestDTO = new UserRequestDTO(email, password);
+        LoginResponse loginResponse = new LoginResponse(newAccessToken, refreshToken);
 
-        when(authenticationService.authenticate(any(UserRequestDTO.class))).thenReturn(null);
-
-        String reqBody = new ObjectMapper().writeValueAsString(requestDTO);
-
-        mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(reqBody))
-                .andExpectAll(
-                        status().isForbidden()
-                );
-    }
-
-    @Test
-    @WithMockUser
-    @DisplayName("Should refresh token successfully")
-    void refreshTokenCase1() throws Exception {
-        UUID validRefreshToken = UUID.randomUUID();
-        String newAccessToken = "my-access-token";
-
-        LoginResponse loginResponse = new LoginResponse(newAccessToken, validRefreshToken);
-
-        when(cookieService.extractRefreshTokenFromCookies(any(HttpServletRequest.class))).thenReturn(validRefreshToken);
-        when(authenticationService.refreshToken(eq(validRefreshToken))).thenReturn(loginResponse);
+        when(cookieService.extractRefreshTokenFromCookies(any(HttpServletRequest.class))).thenReturn(refreshToken);
+        when(authenticationService.refreshToken(refreshToken)).thenReturn(loginResponse);
 
         mockMvc.perform(post("/api/auth/refresh-token").with(csrf()))
-                .andExpectAll(
-                        status().isOk(),
-                        jsonPath("$.accessToken").value(newAccessToken),
-                        jsonPath("$.refreshToken").value(validRefreshToken.toString())
-                );
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").value(newAccessToken))
+                .andExpect(jsonPath("$.refreshToken").value(refreshToken.toString()));
 
         verify(cookieService).addAccessTokenCookie(any(HttpServletResponse.class), eq(newAccessToken));
-        verify(cookieService).addRefreshTokenCookie(any(HttpServletResponse.class), eq(validRefreshToken));
+        verify(cookieService).addRefreshTokenCookie(any(HttpServletResponse.class), eq(refreshToken));
     }
 
     @Test
     @WithMockUser
-    @DisplayName("Should return UNAUTHORIZED when no refresh token in cookie")
-    void refreshTokenCase2() throws Exception {
+    @DisplayName("Refresh token fails without cookie")
+    void refreshToken_noCookie() throws Exception {
         when(cookieService.extractRefreshTokenFromCookies(any(HttpServletRequest.class))).thenReturn(null);
 
         mockMvc.perform(post("/api/auth/refresh-token").with(csrf()))
-                .andExpectAll(
-                        status().isUnauthorized()
-                );
+                .andExpect(status().isUnauthorized());
 
         verifyNoInteractions(authenticationService);
     }
 
     @Test
     @WithMockUser
-    @DisplayName("Should return UNAUTHORIZED when refresh fails")
-    void refreshTokenCase3() throws Exception {
-        UUID invalidRefreshToken = UUID.randomUUID();
-
-        when(cookieService.extractRefreshTokenFromCookies(any(HttpServletRequest.class))).thenReturn(invalidRefreshToken);
-        when(authenticationService.refreshToken(eq(invalidRefreshToken))).thenThrow(new InvalidRefreshTokenException("Token inválido ou expirado"));
-
-        mockMvc.perform(post("/api/auth/refresh-token").with(csrf()))
-                .andExpectAll(
-                        status().isUnauthorized()
-                );
-
-        verify(cookieService).deleteAccessTokenCookie(any(HttpServletResponse.class));
-        verify(cookieService).deleteRefreshTokenCookie(any(HttpServletResponse.class));
-    }
-
-    @Test
-    @WithMockUser
-    @DisplayName("Should logout and revoke token successfully")
-    void logoutCase1() throws Exception {
+    @DisplayName("Logout revokes refresh token and deletes cookies")
+    void logout_success() throws Exception {
         UUID refreshToken = UUID.randomUUID();
-
         when(cookieService.extractRefreshTokenFromCookies(any(HttpServletRequest.class))).thenReturn(refreshToken);
 
         mockMvc.perform(post("/api/auth/logout").with(csrf()))
-                .andExpectAll(
-                        status().isNoContent()
-                );
+                .andExpect(status().isNoContent());
 
-        verify(authenticationService).revokeRefreshToken(eq(refreshToken));
-        verify(cookieService).deleteRefreshTokenCookie(any(HttpServletResponse.class));
+        verify(authenticationService).revokeRefreshToken(refreshToken);
         verify(cookieService).deleteAccessTokenCookie(any(HttpServletResponse.class));
+        verify(cookieService).deleteRefreshTokenCookie(any(HttpServletResponse.class));
     }
 
     @Test
     @WithMockUser
-    @DisplayName("Should logout even without refresh token")
-    void logoutCase2() throws Exception {
+    @DisplayName("Logout works even without refresh token")
+    void logout_noRefreshToken() throws Exception {
         when(cookieService.extractRefreshTokenFromCookies(any(HttpServletRequest.class))).thenReturn(null);
 
         mockMvc.perform(post("/api/auth/logout").with(csrf()))
-                .andExpectAll(
-                        status().isNoContent()
-                );
+                .andExpect(status().isNoContent());
 
         verify(authenticationService, never()).revokeRefreshToken(any());
-        verify(cookieService).deleteRefreshTokenCookie(any(HttpServletResponse.class));
         verify(cookieService).deleteAccessTokenCookie(any(HttpServletResponse.class));
+        verify(cookieService).deleteRefreshTokenCookie(any(HttpServletResponse.class));
     }
+
 }

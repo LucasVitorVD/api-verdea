@@ -108,6 +108,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
     }
 
+    @ExceptionHandler(HistoryNotFoundException.class)
+    public ResponseEntity<ApiError> handleHistoryNotFound(HistoryNotFoundException ex) {
+        ApiError error = new ApiError(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                "Irrigation History not found",
+                ex.getMessage()
+        );
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
+    }
+
     @ExceptionHandler(MqttCommunicationException.class)
     public ResponseEntity<ApiError> handleMqttCommunicationException(MqttCommunicationException ex) {
         ApiError error = new ApiError(

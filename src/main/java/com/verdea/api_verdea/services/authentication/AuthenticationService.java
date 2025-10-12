@@ -40,7 +40,7 @@ public class AuthenticationService {
             User user = userRepository.findByEmail(userEmail)
                     .orElseThrow(() -> new UsernameNotFoundException("Usuário com o email: " + userEmail + " não encontrado"));
 
-            var accessToken = jwtService.generateToken(userEmail);
+            var accessToken = jwtService.generateAccessToken(user);
 
             RefreshToken refreshToken = new RefreshToken();
             refreshToken.setUser(user);
@@ -58,7 +58,7 @@ public class AuthenticationService {
         RefreshToken refreshTokenEntity = refreshTokenRepository.findByIdAndExpiresAtAfter(refreshToken, Instant.now())
                 .orElseThrow(() -> new InvalidRefreshTokenException("Token inválido ou expirado"));
 
-        var newAccessToken = jwtService.generateToken(refreshTokenEntity.getUser().getEmail());
+        var newAccessToken = jwtService.generateAccessToken(refreshTokenEntity.getUser());
 
         return new LoginResponse(newAccessToken, refreshToken);
     }

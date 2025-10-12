@@ -1,4 +1,6 @@
 package com.verdea.api_verdea.dtos.userDto;
 
-public record UserRequestDTO(String email, String password) {
+import com.verdea.api_verdea.enums.Role;
+
+public record UserRequestDTO(String email, String password, Role role) {
 }

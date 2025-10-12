@@ -92,7 +92,7 @@ public class UserProfileController {
                     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiError.class)))
             }
     )
-    public ResponseEntity<Void> deleteOwnUser(
+    public ResponseEntity<Void> deleteUser(
             @Parameter(hidden = true) Authentication authentication,
             @Parameter(hidden = true) HttpServletRequest request,
             @Parameter(hidden = true) HttpServletResponse response

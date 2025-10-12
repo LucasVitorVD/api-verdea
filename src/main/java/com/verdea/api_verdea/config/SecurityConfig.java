@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -29,6 +30,7 @@ import java.util.List;
 @SecurityScheme(name = SecurityConfig.SECURITY, type = SecuritySchemeType.HTTP, bearerFormat = "JWT", scheme = "bearer")
 public class SecurityConfig {
     private final JwtCookieFilter jwtCookieFilter;
+    private final JwtAuthenticationConverter jwtAuthenticationConverter;
 
     public static final String SECURITY = "bearerAuth";
 
@@ -43,6 +45,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/device/send-mac").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/irrigation-history/add").permitAll()
                                 .requestMatchers("/v3/api-docs/**", "swagger-ui/**", "swagger-ui.html").permitAll()
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf
@@ -52,7 +55,8 @@ public class SecurityConfig {
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jtw -> jtw.jwtAuthenticationConverter(jwtAuthenticationConverter)))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtCookieFilter, BearerTokenAuthenticationFilter.class)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()));
