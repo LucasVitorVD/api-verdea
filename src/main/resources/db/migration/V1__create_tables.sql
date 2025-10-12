@@ -46,7 +46,7 @@ CREATE TABLE irrigation_history (
     soil_moisture DOUBLE PRECISION NOT NULL,
     mode VARCHAR(20) NOT NULL DEFAULT 'AUTO',
     duration_seconds INTEGER NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     plant_id BIGINT NOT NULL,
     device_id BIGINT NOT NULL,
     CONSTRAINT fk_irrigation_plant FOREIGN KEY (plant_id) REFERENCES plants(id) ON DELETE CASCADE,

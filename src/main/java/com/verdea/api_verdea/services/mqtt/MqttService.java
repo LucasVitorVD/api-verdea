@@ -3,10 +3,12 @@ package com.verdea.api_verdea.services.mqtt;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceRequestDTO;
+import com.verdea.api_verdea.dtos.irrigationHistoryDto.IrrigationHistoryRequestDTO;
 import com.verdea.api_verdea.dtos.plantDto.PlantResponseDTO;
 import com.verdea.api_verdea.enums.DeviceStatus;
 import com.verdea.api_verdea.exceptions.MqttCommunicationException;
 import com.verdea.api_verdea.services.device.DeviceService;
+import com.verdea.api_verdea.services.irrigationHistory.IrrigationHistoryService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +25,13 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MqttService {
     private final DeviceService deviceService;
+    private final IrrigationHistoryService irrigationHistoryService;
 
     private final MqttClient mqttClient;
     private final MqttConnectOptions mqttConnectOptions;
     private static final String TOPIC_REGISTRATION = "verdea/device/register";
     private static final String TOPIC_STATUS_WILDCARD = "verdea/status/#";
+    private static final String TOPIC_IRRIGATION_HISTORY = "verdea/irrigation/history";
 
     @PostConstruct
     public void init() {
@@ -55,7 +59,8 @@ public class MqttService {
                 mqttClient.connect(mqttConnectOptions);
                 mqttClient.subscribe(TOPIC_REGISTRATION, 1);
                 mqttClient.subscribe(TOPIC_STATUS_WILDCARD, 1);
-                log.info("✅ Conectado e inscrito nos tópicos: {}, {}", TOPIC_REGISTRATION, TOPIC_STATUS_WILDCARD);
+                mqttClient.subscribe(TOPIC_IRRIGATION_HISTORY, 1);
+                log.info("✅ Conectado e inscrito nos tópicos: {}, {}, {}", TOPIC_REGISTRATION, TOPIC_STATUS_WILDCARD, TOPIC_IRRIGATION_HISTORY);
             }
         } catch (MqttException e) {
             log.error("❌ Falha crítica na conexão MQTT: {}", e.getMessage());
@@ -73,6 +78,10 @@ public class MqttService {
 
         if (topic.startsWith("verdea/status/")) {
             handleStatusUpdate(payloadString, message.isRetained());
+        }
+
+        if (topic.equals(TOPIC_IRRIGATION_HISTORY)) {
+            handleIrrigationHistory(payloadString);
         }
     }
 
@@ -106,6 +115,32 @@ public class MqttService {
             }
         } catch (Exception e) {
             log.error("❌ Erro ao processar mensagem de status: {}", e.getMessage());
+        }
+    }
+
+    private void handleIrrigationHistory(String payloadString) {
+        try {
+            log.info("📊 ==========================================");
+            log.info("📊 HISTÓRICO DE IRRIGAÇÃO RECEBIDO");
+            log.info("📊 ==========================================");
+            log.info("📊 Payload: {}", payloadString);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            IrrigationHistoryRequestDTO historyDto = objectMapper.readValue(
+                    payloadString,
+                    IrrigationHistoryRequestDTO.class
+            );
+
+            irrigationHistoryService.saveIrrigation(historyDto);
+
+            log.info("Histórico salvo com sucesso!");
+            log.info("MAC: {}", historyDto.deviceMacAddress());
+            log.info("Umidade: {}%", historyDto.soilMoisture());
+            log.info("Modo: {}", historyDto.mode());
+            log.info("Duração: {}s", historyDto.durationSeconds());
+            log.info("📊 ==========================================");
+        } catch (Exception e) {
+            log.error("❌ Erro ao processar histórico de irrigação: {}", e.getMessage());
         }
     }
 
