@@ -57,7 +57,7 @@ class AuthControllerTest {
     @WithMockUser
     @DisplayName("Register user successfully")
     void registerUser_success() throws Exception {
-        UserRequestDTO request = new UserRequestDTO("email@gmail.com", "12345", Role.USER);
+        UserRequestDTO request = new UserRequestDTO("email@gmail.com", "12345");
         UserResponseDTO response = new UserResponseDTO(1L, request.email(), Role.USER, LocalDateTime.now());
         String body = objectMapper.writeValueAsString(request);
 
@@ -79,7 +79,7 @@ class AuthControllerTest {
     @WithMockUser
     @DisplayName("Authenticate and set cookies correctly")
     void authenticate_success() throws Exception {
-        UserRequestDTO request = new UserRequestDTO("user@gmail.com", "123456", Role.USER);
+        UserRequestDTO request = new UserRequestDTO("user@gmail.com", "123456");
         UUID refreshToken = UUID.randomUUID();
         String accessToken = "access-token";
 

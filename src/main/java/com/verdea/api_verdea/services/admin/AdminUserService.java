@@ -45,7 +45,7 @@ public class AdminUserService {
         User newUser = new User();
         newUser.setEmail(dto.email());
         newUser.setPassword(passwordEncoder.encode(dto.password()));
-        newUser.setRole(dto.role() != null ? dto.role() : Role.USER);
+        newUser.setRole(Role.USER);
 
         User savedUser = userRepository.save(newUser);
         return userMapper.entityToResponse(savedUser);

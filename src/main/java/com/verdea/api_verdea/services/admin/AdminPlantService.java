@@ -8,6 +8,7 @@ import com.verdea.api_verdea.entities.PlantWateringTime;
 import com.verdea.api_verdea.exceptions.DeviceAlreadyAssignedException;
 import com.verdea.api_verdea.exceptions.DeviceNotFoundException;
 import com.verdea.api_verdea.exceptions.PlantNotFoundException;
+import com.verdea.api_verdea.exceptions.UserNotFoundException;
 import com.verdea.api_verdea.repositories.DeviceRepository;
 import com.verdea.api_verdea.repositories.PlantRepository;
 import com.verdea.api_verdea.services.mqtt.MqttService;
@@ -38,15 +39,15 @@ public class AdminPlantService {
 
     @Transactional
     public PlantResponseDTO createPlant(PlantRequestDTO dto) {
-        Device device = null;
+        Device device = deviceRepository.findByMacAddress(dto.deviceMacAddress())
+                .orElseThrow(() -> new DeviceNotFoundException("Dispositivo não encontrado."));
 
-        if (dto.deviceMacAddress() != null) {
-            device = deviceRepository.findByMacAddress(dto.deviceMacAddress())
-                    .orElseThrow(() -> new DeviceNotFoundException("Dispositivo não encontrado."));
+        if (device.getPlant() != null) {
+            throw new DeviceAlreadyAssignedException("Esse dispositivo já está vinculado a uma planta");
+        }
 
-            if (device.getPlant() != null) {
-                throw new DeviceAlreadyAssignedException("Dispositivo já vinculado a outra planta.");
-            }
+        if (device.getUser() == null) {
+            throw new UserNotFoundException("Usuario não encontrado.");
         }
 
         Plant plant = new Plant();
@@ -60,15 +61,9 @@ public class AdminPlantService {
         plant.setImageUrl(dto.imageUrl());
         plant.setDevice(device);
 
-        if (device != null) {
-            device.setPlant(plant);
-        }
-
         Plant savedPlant = plantRepository.save(plant);
 
-        if (device != null) {
-            mqttService.sendPlantConfigToDevice(device.getMacAddress(), mapToPlantResponseDTO(savedPlant));
-        }
+        mqttService.sendPlantConfigToDevice(device.getMacAddress(), mapToPlantResponseDTO(savedPlant));
 
         return mapToPlantResponseDTO(savedPlant);
     }

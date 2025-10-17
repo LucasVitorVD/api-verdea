@@ -30,7 +30,7 @@ public class UserService {
         User newUser = new User();
         newUser.setEmail(dto.email());
         newUser.setPassword(passwordEncoder.encode(dto.password()));
-        newUser.setRole(dto.role());
+        newUser.setRole(Role.USER);
 
         User savedUser = userRepository.save(newUser);
 

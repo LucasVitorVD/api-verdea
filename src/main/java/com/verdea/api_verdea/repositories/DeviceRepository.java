@@ -13,4 +13,5 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
     boolean existsByMacAddress(String macAddress);
     Optional<Device> findByMacAddress(String macAddress);
     List<Device> findAllByUser(User user);
+    List<Device> findAllByUserIsNotNull();
 }
