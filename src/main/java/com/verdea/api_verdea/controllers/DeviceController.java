@@ -66,14 +66,14 @@ public class DeviceController {
         return ResponseEntity.ok(deviceService.getDeviceById(deviceId));
     }
 
-    @PatchMapping("/update/{deviceId}")
+    @PatchMapping("/{deviceId}")
     public ResponseEntity<Void> updateDevice(@PathVariable Long deviceId, @RequestBody DeviceRequestDTO deviceRequestDTO) {
         deviceService.updateDevice(deviceId, deviceRequestDTO);
 
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDevice(@PathVariable Long id) {
         deviceService.deleteDeviceById(id);
 

@@ -14,7 +14,7 @@ CREATE TABLE devices (
     status VARCHAR(20) DEFAULT 'offline' NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id BIGINT,
-    CONSTRAINT fk_device_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    CONSTRAINT fk_device_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 CREATE TABLE plants (

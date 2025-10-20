@@ -59,10 +59,10 @@ public class Plant {
     private List<IrrigationHistory> irrigationHistory = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @OneToOne
-    @JoinColumn(name = "device_id", referencedColumnName = "id", nullable = false, unique = true)
+    @JoinColumn(name = "device_id", referencedColumnName = "id", unique = true)
     private Device device;
 }

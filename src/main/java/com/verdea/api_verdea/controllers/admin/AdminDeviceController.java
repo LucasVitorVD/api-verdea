@@ -51,7 +51,7 @@ public class AdminDeviceController {
         return ResponseEntity.ok(adminDeviceService.getDeviceById(id));
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<DeviceResponseDTO> updateDevice(@PathVariable Long id, @RequestBody DeviceRequestDTO dto) {
         return ResponseEntity.ok(adminDeviceService.updateDevice(id, dto));
     }

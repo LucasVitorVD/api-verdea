@@ -27,12 +27,12 @@ public class AdminPlantController {
         return adminPlantService.getPlantById(id);
     }
 
-    @PostMapping
+    @PostMapping("/add")
     public PlantResponseDTO createPlant(@RequestBody PlantRequestDTO dto) {
         return adminPlantService.createPlant(dto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public PlantResponseDTO updatePlant(@PathVariable Long id, @RequestBody PlantRequestDTO dto) {
         return adminPlantService.updatePlant(id, dto);
     }

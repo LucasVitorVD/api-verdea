@@ -3,21 +3,26 @@ package com.verdea.api_verdea.services.user;
 import com.verdea.api_verdea.dtos.userDto.UpdateUserRequestDTO;
 import com.verdea.api_verdea.dtos.userDto.UserRequestDTO;
 import com.verdea.api_verdea.dtos.userDto.UserResponseDTO;
+import com.verdea.api_verdea.entities.Device;
 import com.verdea.api_verdea.entities.User;
 import com.verdea.api_verdea.enums.Role;
 import com.verdea.api_verdea.exceptions.EmailAlreadyInUseException;
 import com.verdea.api_verdea.exceptions.UserNotFoundException;
 import com.verdea.api_verdea.mappers.UserMapper;
+import com.verdea.api_verdea.repositories.DeviceRepository;
 import com.verdea.api_verdea.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final DeviceRepository deviceRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
@@ -49,8 +54,23 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado."));
 
+        List<Device> devices = deviceRepository.findAllByUser(user);
+        devices.forEach(device -> device.setUser(null));
+        deviceRepository.saveAll(devices);
+
+        if (user.getPlants() != null && !user.getPlants().isEmpty()) {
+            user.getPlants().forEach(plant -> {
+                if (plant.getDevice() != null) {
+                    plant.getDevice().setPlant(null);
+                    deviceRepository.save(plant.getDevice());
+                    plant.setDevice(null);
+                }
+            });
+        }
+
         userRepository.delete(user);
     }
+
 
     @Transactional
     public UserResponseDTO updateUserInfo(String currentEmail, UpdateUserRequestDTO dto) {

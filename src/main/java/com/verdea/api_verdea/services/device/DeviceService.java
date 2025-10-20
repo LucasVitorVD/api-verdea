@@ -136,7 +136,10 @@ public class DeviceService {
         Device device = deviceRepository.findById(id)
                 .orElseThrow(() -> new DeviceNotFoundException("Dispositivo não encontrado."));
 
-        deviceRepository.delete(device);
+        device.setUser(null);
+        device.setPlant(null);
+
+        deviceRepository.save(device);
     }
 
     public void resetWifiMqtt(Long id) {

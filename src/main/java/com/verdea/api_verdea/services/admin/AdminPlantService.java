@@ -60,6 +60,7 @@ public class AdminPlantService {
         plant.setMode(dto.mode());
         plant.setImageUrl(dto.imageUrl());
         plant.setDevice(device);
+        plant.setUser(device.getUser());
 
         Plant savedPlant = plantRepository.save(plant);
 
