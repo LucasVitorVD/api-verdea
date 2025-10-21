@@ -5,6 +5,7 @@ services:
     image: bitnami/postgresql:latest
     container_name: verdea_postgres
     environment:
+      SPRING_PROFILES_ACTIVE: dev
       POSTGRES_DB: verdea
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
