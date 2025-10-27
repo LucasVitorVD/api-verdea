@@ -36,7 +36,7 @@ public class CookieService {
                 .secure(secureCookie)
                 .path("/")
                 .maxAge(accessTokenTtl.getSeconds())
-                .sameSite("Strict")
+                .sameSite("None")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -48,7 +48,7 @@ public class CookieService {
                 .secure(secureCookie)
                 .path("/")
                 .maxAge(refreshTokenTtlSeconds)
-                .sameSite("Strict")
+                .sameSite("None")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -60,7 +60,7 @@ public class CookieService {
                 .secure(secureCookie)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Strict")
+                .sameSite("None")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -72,7 +72,7 @@ public class CookieService {
                 .secure(secureCookie)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Strict")
+                .sameSite("None")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());

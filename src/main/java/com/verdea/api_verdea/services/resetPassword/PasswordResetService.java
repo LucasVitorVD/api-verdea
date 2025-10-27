@@ -2,11 +2,13 @@ package com.verdea.api_verdea.services.resetPassword;
 
 import com.verdea.api_verdea.entities.PasswordResetToken;
 import com.verdea.api_verdea.entities.User;
+import com.verdea.api_verdea.exceptions.SamePasswordException;
 import com.verdea.api_verdea.exceptions.UserNotFoundException;
 import com.verdea.api_verdea.repositories.PasswordResetTokenRepository;
 import com.verdea.api_verdea.repositories.UserRepository;
 import com.verdea.api_verdea.services.email.EmailService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,9 @@ public class PasswordResetService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
+
     @Async
     public void sendResetPasswordEmail(String email) {
         User user = userRepo.findByEmail(email)
@@ -35,7 +40,8 @@ public class PasswordResetService {
         resetToken.setExpiryDate(LocalDateTime.now().plusMinutes(30));
         tokenRepo.save(resetToken);
 
-        String link = "http://localhost:3000/register/reset-password?token=" + token;
+        String link = frontendUrl + "/register/reset-password?token=" + token;
+
         emailService.sendEmail(
                 user.getEmail(),
                 "Redefinição de senha",
@@ -52,6 +58,11 @@ public class PasswordResetService {
         }
 
         User user = resetToken.getUser();
+
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new SamePasswordException("A nova senha não pode ser igual à senha atual");
+        }
+
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepo.save(user);
         tokenRepo.delete(resetToken);
