@@ -89,6 +89,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000",
+                "https://verdea-g97k7bm6v-lucasvitorvds-projects.vercel.app",
                 "https://*.vercel.app",
                 "https://*.ngrok-free.dev"
         ));
