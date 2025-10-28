@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
@@ -41,28 +42,27 @@ public class SecurityConfig {
                         authorize
                                 .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
                                 .requestMatchers("/api/csrf").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/device/add").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/device/send-mac").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/device/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/irrigation-history/add").permitAll()
-                                .requestMatchers("/v3/api-docs/**", "swagger-ui/**", "swagger-ui.html").permitAll()
+                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers(
                                 "/api/auth/**",
-                                "/api/device/send-mac",
-                                "/api/device/add",
-                                "/api/irrigation-history/add"
+                                "/api/device/**",
+                                "/api/irrigation-history/**"
                         )
                         .csrfTokenRepository(customCsrfTokenRepository())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jtw -> jtw.jwtAuthenticationConverter(jwtAuthenticationConverter)))
+                        .jwt(Customizer.withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtCookieFilter, BearerTokenAuthenticationFilter.class)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
+                // IMPORTANTE: Adiciona o filtro ANTES do filtro de autenticação
+                .addFilterBefore(jwtCookieFilter, UsernamePasswordAuthenticationFilter.class)
+                .cors(Customizer.withDefaults());
 
         return http.build();
     }

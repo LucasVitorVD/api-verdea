@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Component
 public class JwtCookieFilter extends OncePerRequestFilter {
@@ -30,8 +31,16 @@ public class JwtCookieFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // Ignora rotas públicas
-        if (path.startsWith("/api/auth/") || path.equals("/api/csrf")) {
+        // Ignora rotas públicas e endpoints de auth
+        if (path.startsWith("/api/auth/") || path.equals("/api/csrf") ||
+                path.startsWith("/v3/api-docs") || path.startsWith("/swagger-ui")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // Verifica se já existe um header Authorization
+        String existingAuth = request.getHeader("Authorization");
+        if (existingAuth != null && existingAuth.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -39,10 +48,8 @@ public class JwtCookieFilter extends OncePerRequestFilter {
         // Extrai o token do cookie
         String token = cookieService.extractAccessTokenFromCookies(request);
 
-        // Se o token estiver presente no cookie, adiciona-o ao cabeçalho Authorization
-        // para que o filtro OAuth2ResourceServer/JWT padrão do Spring Security possa processá-lo
         if (token != null && !token.isBlank()) {
-            // Cria um novo wrapper de requisição para modificar os cabeçalhos
+            // Cria um wrapper para adicionar o header Authorization
             HttpServletRequestWrapper requestWrapper = new HttpServletRequestWrapper(request) {
                 @Override
                 public String getHeader(String name) {
@@ -55,7 +62,7 @@ public class JwtCookieFilter extends OncePerRequestFilter {
                 @Override
                 public Enumeration<String> getHeaders(String name) {
                     if ("Authorization".equalsIgnoreCase(name)) {
-                        return Collections.enumeration(Collections.singletonList("Bearer " + token));
+                        return Collections.enumeration(List.of("Bearer " + token));
                     }
                     return super.getHeaders(name);
                 }
@@ -70,10 +77,8 @@ public class JwtCookieFilter extends OncePerRequestFilter {
                 }
             };
 
-            // Continua a cadeia com o wrapper
             filterChain.doFilter(requestWrapper, response);
         } else {
-            // Sem token no cookie, continua normalmente
             filterChain.doFilter(request, response);
         }
     }
