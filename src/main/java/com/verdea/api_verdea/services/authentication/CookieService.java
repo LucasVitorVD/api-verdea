@@ -33,7 +33,7 @@ public class CookieService {
     public void addAccessTokenCookie(HttpServletResponse response, String accessToken) {
         ResponseCookie cookie = ResponseCookie.from(accessTokenCookieName, accessToken)
                 .httpOnly(true)
-                .secure(secureCookie)
+                .secure(true)
                 .path("/")
                 .maxAge(accessTokenTtl.getSeconds())
                 .sameSite("None")
@@ -45,7 +45,7 @@ public class CookieService {
     public void addRefreshTokenCookie(HttpServletResponse response, UUID refreshToken) {
         ResponseCookie cookie = ResponseCookie.from(refreshTokenCookieName, refreshToken.toString())
                 .httpOnly(true)
-                .secure(secureCookie)
+                .secure(true)
                 .path("/")
                 .maxAge(refreshTokenTtlSeconds)
                 .sameSite("None")
@@ -57,7 +57,7 @@ public class CookieService {
     public void deleteAccessTokenCookie(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from(accessTokenCookieName, "")
                 .httpOnly(true)
-                .secure(secureCookie)
+                .secure(true)
                 .path("/")
                 .maxAge(0)
                 .sameSite("None")
@@ -69,7 +69,7 @@ public class CookieService {
     public void deleteRefreshTokenCookie(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from(refreshTokenCookieName, "")
                 .httpOnly(true)
-                .secure(secureCookie)
+                .secure(true)
                 .path("/")
                 .maxAge(0)
                 .sameSite("None")

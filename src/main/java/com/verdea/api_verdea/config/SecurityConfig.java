@@ -49,9 +49,12 @@ public class SecurityConfig {
                                 .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/device/send-mac")
-                        .ignoringRequestMatchers("/api/device/add")
-                        .ignoringRequestMatchers("/api/irrigation-history/add")
+                        .ignoringRequestMatchers(
+                                "/api/auth/**",
+                                "/api/device/send-mac",
+                                "/api/device/add",
+                                "/api/irrigation-history/add"
+                        )
                         .csrfTokenRepository(customCsrfTokenRepository())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
                 )
@@ -87,16 +90,18 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+
+        // Use allowedOriginPatterns OU allowedOrigins, não ambos
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000",
-                "https://vercel.app",
-                "https://verdea-g97k7bm6v-lucasvitorvds-projects.vercel.app",
-                "https://*.vercel.app"
+                "https://*.vercel.app",
+                "https://verdea-swart.vercel.app",
+                "https://verdea-g97k7bm6v-lucasvitorvds-projects.vercel.app"
         ));
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://verdea-g97k7bm6v-lucasvitorvds-projects.vercel.app", "https://verdea-swart.vercel.app"));
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("Set-Cookie", "X-XSRF-TOKEN"));
+        configuration.setExposedHeaders(List.of("Set-Cookie", "X-XSRF-TOKEN", "Authorization"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
