@@ -27,7 +27,7 @@ public class AdminUserService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     public List<UserResponseDTO> getAllUsers() {
-        return userRepository.findAll().stream()
+        return userRepository.findAllByRole(Role.USER).stream()
                 .map(userMapper::entityToResponse)
                 .toList();
     }

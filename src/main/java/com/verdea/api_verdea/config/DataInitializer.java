@@ -32,6 +32,7 @@ public class DataInitializer {
     public ApplicationRunner initializeAdmin() {
         return args -> {
             if (userRepository.existsByEmail(adminEmail)) return;
+            if (!userRepository.findAllByRole(Role.ADMIN).isEmpty()) return;
 
             User admin = User.builder()
                     .email(adminEmail)

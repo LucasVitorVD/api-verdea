@@ -8,10 +8,7 @@ import com.verdea.api_verdea.dtos.userDto.UserResponseDTO;
 import com.verdea.api_verdea.entities.Device;
 import com.verdea.api_verdea.entities.User;
 import com.verdea.api_verdea.enums.DeviceStatus;
-import com.verdea.api_verdea.exceptions.DeviceAlreadyAssignedException;
-import com.verdea.api_verdea.exceptions.DeviceAlreadyExistsException;
-import com.verdea.api_verdea.exceptions.DeviceNotFoundException;
-import com.verdea.api_verdea.exceptions.UserNotFoundException;
+import com.verdea.api_verdea.exceptions.*;
 import com.verdea.api_verdea.repositories.DeviceRepository;
 import com.verdea.api_verdea.repositories.UserRepository;
 import com.verdea.api_verdea.services.mqtt.MqttService;
@@ -62,6 +59,24 @@ public class AdminDeviceService {
         deviceRepository.save(device);
 
         return new DeviceAssignmentResponseDTO(device.getName(), device.getMacAddress(), device.getUser().getEmail(), LocalDateTime.now());
+    }
+
+    @Transactional
+    public void unassignDeviceFromUser(Long deviceId) {
+        Device device = deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new DeviceNotFoundException("Dispositivo não encontrado."));
+
+        if (device.getUser() == null) {
+            throw new DeviceNotLinkedException("Este dispositivo já não está vinculado a nenhum usuário.");
+        }
+
+        device.setUser(null);
+        if (device.getPlant() != null) {
+            device.getPlant().setDevice(null);
+            device.setPlant(null);
+        }
+
+        deviceRepository.save(device);
     }
 
     @Transactional

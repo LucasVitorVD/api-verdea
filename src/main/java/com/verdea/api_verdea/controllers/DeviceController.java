@@ -80,7 +80,7 @@ public class DeviceController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/reset-wifi-mqtt/{deviceId}")
+    @PostMapping("/reset-wifi/{deviceId}")
     public ResponseEntity<Void> resetWifiByMqtt(@PathVariable Long deviceId) {
         deviceService.resetWifiMqtt(deviceId);
 

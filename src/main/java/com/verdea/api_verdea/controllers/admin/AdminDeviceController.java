@@ -46,6 +46,19 @@ public class AdminDeviceController {
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("/unassign/{id}")
+    public ResponseEntity<DeviceResponseDTO> unassignDevice(@PathVariable Long id) {
+        adminDeviceService.unassignDeviceFromUser(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset-wifi/{deviceId}")
+    public ResponseEntity<Void> resetDeviceWifi(@PathVariable Long deviceId) {
+        adminDeviceService.resetWifi(deviceId);
+
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<DeviceResponseDTO> getDeviceById(@PathVariable Long id) {
         return ResponseEntity.ok(adminDeviceService.getDeviceById(id));
