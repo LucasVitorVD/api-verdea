@@ -32,7 +32,7 @@ public class AdminPlantController {
         return adminPlantService.createPlant(dto);
     }
 
-    @PutMapping("/update/{id}")
+    @PatchMapping("/update/{id}")
     public PlantResponseDTO updatePlant(@PathVariable Long id, @RequestBody PlantRequestDTO dto) {
         return adminPlantService.updatePlant(id, dto);
     }

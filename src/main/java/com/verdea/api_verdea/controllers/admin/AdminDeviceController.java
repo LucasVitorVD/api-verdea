@@ -23,7 +23,7 @@ public class AdminDeviceController {
             Pattern.compile("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$");
 
     @GetMapping
-    public ResponseEntity<List<DeviceResponseDTO>> getAllDevices() {
+    public ResponseEntity<List<DeviceResponseAdminDTO>> getAllDevices() {
         return ResponseEntity.ok(adminDeviceService.getAllDevices());
     }
 

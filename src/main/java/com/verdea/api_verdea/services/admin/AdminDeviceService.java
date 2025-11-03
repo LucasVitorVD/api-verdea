@@ -1,9 +1,6 @@
 package com.verdea.api_verdea.services.admin;
 
-import com.verdea.api_verdea.dtos.deviceDto.DeviceAssignmentResponseDTO;
-import com.verdea.api_verdea.dtos.deviceDto.DeviceAvailableResponseDTO;
-import com.verdea.api_verdea.dtos.deviceDto.DeviceRequestDTO;
-import com.verdea.api_verdea.dtos.deviceDto.DeviceResponseDTO;
+import com.verdea.api_verdea.dtos.deviceDto.*;
 import com.verdea.api_verdea.dtos.userDto.UserResponseDTO;
 import com.verdea.api_verdea.entities.Device;
 import com.verdea.api_verdea.entities.User;
@@ -26,9 +23,9 @@ public class AdminDeviceService {
     private final UserRepository userRepository;
     private final MqttService mqttService;
 
-    public List<DeviceResponseDTO> getAllDevices() {
+    public List<DeviceResponseAdminDTO> getAllDevices() {
         return deviceRepository.findAll().stream()
-                .map(this::mapToDeviceResponseDTO)
+                .map(this::mapToDeviceResponseAdminDTO)
                 .toList();
     }
 
@@ -128,6 +125,23 @@ public class AdminDeviceService {
                 device.getCreatedAt(),
                 isOnline,
                 null // não associamos planta aqui
+        );
+    }
+
+    private DeviceResponseAdminDTO mapToDeviceResponseAdminDTO(Device device) {
+        boolean isOnline = device.getStatus() == DeviceStatus.ONLINE;
+        String userEmail = device.getUser() != null ? device.getUser().getEmail() : null;
+        String plantName = device.getPlant() != null ? device.getPlant().getName() : null;
+
+        return new DeviceResponseAdminDTO(
+                device.getId(),
+                device.getName(),
+                device.getMacAddress(),
+                device.getCurrentIp(),
+                device.getCreatedAt(),
+                isOnline,
+                userEmail,
+                plantName
         );
     }
 
