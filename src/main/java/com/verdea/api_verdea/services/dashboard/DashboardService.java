@@ -1,6 +1,7 @@
 package com.verdea.api_verdea.services.dashboard;
 
 import com.verdea.api_verdea.dtos.dashboardDto.DashboardResponseDTO;
+import com.verdea.api_verdea.dtos.dashboardDto.SoilMoistureChartDTO;
 import com.verdea.api_verdea.dtos.plantDto.LastIrrigationDTO;
 import com.verdea.api_verdea.enums.DeviceStatus;
 import com.verdea.api_verdea.exceptions.UserNotFoundException;
@@ -10,6 +11,9 @@ import com.verdea.api_verdea.repositories.PlantRepository;
 import com.verdea.api_verdea.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.List;
 
 @Service
 public class DashboardService {
@@ -56,5 +60,18 @@ public class DashboardService {
                 lastIrrigation,
                 avgMoisture
         );
+    }
+
+    public List<SoilMoistureChartDTO> getSoilMoistureData(String userEmail) {
+        long userId = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado")).getId();
+
+        return irrigationHistoryRepository.findSoilMoistureDataByUserId(userId)
+                .stream()
+                .map(result -> new SoilMoistureChartDTO(
+                        (Instant) result[0],
+                        (Double) result[1]
+                ))
+                .toList();
     }
 }
