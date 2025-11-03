@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface PlantRepository extends JpaRepository<Plant, Long> {
     List<Plant> findAllByUser(User user);
+    long countByUserId(Long userId);
 }

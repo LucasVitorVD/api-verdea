@@ -2,6 +2,7 @@ package com.verdea.api_verdea.repositories;
 
 import com.verdea.api_verdea.entities.Device;
 import com.verdea.api_verdea.entities.User;
+import com.verdea.api_verdea.enums.DeviceStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,4 +15,6 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
     Optional<Device> findByMacAddress(String macAddress);
     List<Device> findAllByUser(User user);
     List<Device> findAllByUserIsNotNull();
+    long countByUserId(Long userId);
+    long countByUserIdAndStatus(Long userId, DeviceStatus status);
 }
