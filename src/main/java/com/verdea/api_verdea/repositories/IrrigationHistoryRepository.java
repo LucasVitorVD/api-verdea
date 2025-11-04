@@ -1,6 +1,5 @@
 package com.verdea.api_verdea.repositories;
 
-import com.verdea.api_verdea.dtos.dashboardDto.SoilMoistureChartDTO;
 import com.verdea.api_verdea.entities.IrrigationHistory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,4 +36,11 @@ public interface IrrigationHistoryRepository extends JpaRepository<IrrigationHis
     """)
     List<Object[]> findSoilMoistureDataByUserId(Long userId);
 
+    @Query("""
+        SELECT COUNT(ih)
+        FROM IrrigationHistory ih
+        JOIN ih.device d
+        WHERE d.user.id = :userId
+    """)
+    long countByUserId(Long userId);
 }

@@ -1,6 +1,7 @@
 package com.verdea.api_verdea.services.dashboard;
 
 import com.verdea.api_verdea.dtos.dashboardDto.DashboardResponseDTO;
+import com.verdea.api_verdea.dtos.dashboardDto.ProfileDashboardResponseDTO;
 import com.verdea.api_verdea.dtos.dashboardDto.SoilMoistureChartDTO;
 import com.verdea.api_verdea.dtos.plantDto.LastIrrigationDTO;
 import com.verdea.api_verdea.enums.DeviceStatus;
@@ -73,5 +74,26 @@ public class DashboardService {
                         (Double) result[1]
                 ))
                 .toList();
+    }
+
+    public ProfileDashboardResponseDTO getProfileDashboardData(String userEmail) {
+        long userId = userRepository.findByEmail(userEmail).orElseThrow(() -> new UserNotFoundException("Usuário não encontrado")).getId();
+
+        long totalPlants = plantRepository.countByUserId(userId);
+        long totalDevices = deviceRepository.countByUserId(userId);
+        long totalIrrigationHistory = irrigationHistoryRepository.countByUserId(userId);
+
+        double irrigationScore = totalIrrigationHistory * 2;
+        double plantScore = totalPlants * 10;
+        double deviceScore = totalDevices * 15;
+        double rawScore = irrigationScore + plantScore + deviceScore;
+        double engagementLevel = Math.min(100, rawScore / 5);
+
+        return new ProfileDashboardResponseDTO(
+                totalPlants,
+                totalDevices,
+                totalIrrigationHistory,
+                engagementLevel
+        );
     }
 }

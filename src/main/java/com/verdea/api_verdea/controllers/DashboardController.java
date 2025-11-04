@@ -1,6 +1,7 @@
 package com.verdea.api_verdea.controllers;
 
 import com.verdea.api_verdea.dtos.dashboardDto.DashboardResponseDTO;
+import com.verdea.api_verdea.dtos.dashboardDto.ProfileDashboardResponseDTO;
 import com.verdea.api_verdea.dtos.dashboardDto.SoilMoistureChartDTO;
 import com.verdea.api_verdea.services.dashboard.DashboardService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,13 @@ public class DashboardController {
         String userEmail = authentication.getName();
         List<SoilMoistureChartDTO> response = dashboardService.getSoilMoistureData(userEmail);
 
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<ProfileDashboardResponseDTO> getProfileData(Authentication authentication) {
+        String userEmail = authentication.getName();
+        ProfileDashboardResponseDTO response = dashboardService.getProfileDashboardData(userEmail);
         return ResponseEntity.ok(response);
     }
 }
