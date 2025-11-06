@@ -3,10 +3,14 @@ package com.verdea.api_verdea.services.mqtt;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.verdea.api_verdea.dtos.deviceDto.DeviceRequestDTO;
+import com.verdea.api_verdea.dtos.deviceDto.DeviceResponseDTO;
+import com.verdea.api_verdea.dtos.deviceDto.SendMacRequest;
 import com.verdea.api_verdea.dtos.irrigationHistoryDto.IrrigationHistoryRequestDTO;
 import com.verdea.api_verdea.dtos.plantDto.PlantResponseDTO;
+import com.verdea.api_verdea.entities.Device;
 import com.verdea.api_verdea.enums.DeviceStatus;
 import com.verdea.api_verdea.exceptions.MqttCommunicationException;
+import com.verdea.api_verdea.repositories.UserRepository;
 import com.verdea.api_verdea.services.device.DeviceService;
 import com.verdea.api_verdea.services.irrigationHistory.IrrigationHistoryService;
 import jakarta.annotation.PostConstruct;
@@ -14,7 +18,6 @@ import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.*;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -25,6 +28,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MqttService {
     private final DeviceService deviceService;
+    private final UserRepository userRepository;
     private final IrrigationHistoryService irrigationHistoryService;
 
     private final MqttClient mqttClient;
@@ -89,8 +93,32 @@ public class MqttService {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             DeviceRequestDTO deviceDto = objectMapper.readValue(payloadString, DeviceRequestDTO.class);
-            deviceService.registerDevice(deviceDto);
-            log.info("✅ Dispositivo com MAC '{}' registrado com sucesso.", deviceDto.macAddress());
+            DeviceResponseDTO savedDevice = deviceService.registerDevice(deviceDto);
+
+            if (!deviceDto.email().isEmpty()) {
+                log.info("Email recebido: {}", deviceDto.email());
+                SendMacRequest macRequest = new SendMacRequest(deviceDto.email(), deviceDto.name(), deviceDto.macAddress());
+                deviceService.sendEmailWithMacAddress(macRequest);
+            }
+
+            log.info("✅ Dispositivo com MAC '{}' registrado com sucesso.", savedDevice.macAddress());
+
+
+//            if (!deviceDto.email().isEmpty()) {
+//                log.info("Email recebido: {}", deviceDto.email());
+//
+//                if (userRepository.findByEmail(deviceDto.email()).isEmpty()) {
+//                    String topic = "verdea/commands/" + deviceDto.macAddress().replace(":", "");
+//                    String payload = "RESET_WIFI";
+//
+//                    this.publish(topic, payload);
+//
+//                    return;
+//                }
+//
+//                SendMacRequest macRequest = new SendMacRequest(deviceDto.email(), deviceDto.name(), deviceDto.macAddress());
+//                deviceService.sendEmailWithMacAddress(macRequest);
+//            }
         } catch (Exception e) {
             log.error("❌ Erro ao processar mensagem de registro: {}", e.getMessage());
         }

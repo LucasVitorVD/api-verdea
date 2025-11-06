@@ -19,5 +19,7 @@ public record DeviceRequestDTO(
         String currentIp,
 
         @NotBlank(message = "Status é obrigatório")
-        String status
+        String status,
+
+        String email // ✅ novo campo opcional
 ) {}
